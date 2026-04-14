@@ -1,0 +1,36 @@
+{
+  "name": "vroom-vroom-cliker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint src/**/*.js",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "build": "echo 'Aucune étape de build nécessaire'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Legluc/Vroom-vroom-cliker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Legluc/Vroom-vroom-cliker/issues"
+  },
+  "homepage": "https://github.com/Legluc/Vroom-vroom-cliker#readme",
+  "dependencies": {
+    "ejs": "^5.0.2",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^10.2.0",
+    "nodemon": "^3.1.14",
+    "playwright": "^1.59.1",
+    "vitest": "^4.1.4"
+  }
+}
