@@ -49,7 +49,7 @@ export function createGameRouter(db) {
   router.post("/upgrade", (req, res) => {
     const { categoryId, tierId } = req.body ?? {};
 
-    if (categoryId == null || tierId == null) {
+    if (categoryId === undefined || tierId === undefined) {
       return res.status(400).json({ error: "INVALID_BODY" });
     }
 
