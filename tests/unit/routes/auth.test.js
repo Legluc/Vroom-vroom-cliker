@@ -5,6 +5,10 @@ import { createApp } from "../../../src/app.js";
 import { runMigrations } from "../../../src/db/migrations.js";
 import * as bcrypt from "bcrypt";
 
+// Test fixtures (NOT for production use)
+const TEST_USERNAME = "testuser";
+const TEST_PASSWORD = "testpass123";
+
 describe("Routes Authentication", () => {
   let app;
   let db;
@@ -22,34 +26,34 @@ describe("Routes Authentication", () => {
   it("AUTH-01 — devrait créer un compte avec inscription réussie", async () => {
     const response = await request(app)
       .post("/auth/register")
-      .send({ username: "pilote42", password: "Secure!99" });
+      .send({ username: TEST_USERNAME, password: TEST_PASSWORD });
 
     expect([201, 302]).toContain(response.status);
 
     // Vérifier que l'utilisateur a été créé
     const user = db
       .prepare("SELECT * FROM users WHERE username = ?")
-      .get("pilote42");
+      .get(TEST_USERNAME);
 
     expect(user).toBeDefined();
-    expect(user.username).toBe("pilote42");
+    expect(user.username).toBe(TEST_USERNAME);
     // Vérifier que le mot de passe est hashé (pas en clair)
-    expect(user.password).not.toBe("Secure!99");
+    expect(user.password).not.toBe(TEST_PASSWORD);
     expect(user.password).toBeTruthy();
   });
 
   // SCENARIO AUTH-02 — Inscription avec pseudo déjà pris
   it("AUTH-02 — devrait rejeter inscription si pseudo déjà pris", async () => {
     // Insérer un utilisateur existant
-    const hashedPassword = await bcrypt.hash("existing", 10);
+    const hashedPassword = await bcrypt.hash(TEST_PASSWORD, 10);
     db.prepare("INSERT INTO users (username, password) VALUES (?, ?)").run(
-      "pilote42",
+      TEST_USERNAME,
       hashedPassword,
     );
 
     const response = await request(app)
       .post("/auth/register")
-      .send({ username: "pilote42", password: "autre" });
+      .send({ username: TEST_USERNAME, password: "different" });
 
     expect([409, 400]).toContain(response.status);
     expect(response.body.error).toMatch(/USERNAME_TAKEN|déjà pris/i);
@@ -71,16 +75,15 @@ describe("Routes Authentication", () => {
 
   // SCENARIO AUTH-04 — Connexion réussie
   it("AUTH-04 — devrait connecter utilisateur avec identifiants corrects", async () => {
-    const password = "Secure!99";
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(TEST_PASSWORD, 10);
     db.prepare("INSERT INTO users (username, password) VALUES (?, ?)").run(
-      "pilote42",
+      TEST_USERNAME,
       hashedPassword,
     );
 
     const response = await request(app)
       .post("/auth/login")
-      .send({ username: "pilote42", password });
+      .send({ username: TEST_USERNAME, password: TEST_PASSWORD });
 
     expect([302, 200]).toContain(response.status);
     // Vérifier que la session est créée (cookie ou header)
@@ -91,15 +94,15 @@ describe("Routes Authentication", () => {
 
   // SCENARIO AUTH-05 — Connexion avec mauvais mot de passe
   it("AUTH-05 — devrait rejeter connexion si mauvais mot de passe", async () => {
-    const hashedPassword = await bcrypt.hash("Secure!99", 10);
+    const hashedPassword = await bcrypt.hash(TEST_PASSWORD, 10);
     db.prepare("INSERT INTO users (username, password) VALUES (?, ?)").run(
-      "pilote42",
+      TEST_USERNAME,
       hashedPassword,
     );
 
     const response = await request(app)
       .post("/auth/login")
-      .send({ username: "pilote42", password: "mauvais" });
+      .send({ username: TEST_USERNAME, password: "wrongpass" });
 
     expect([401, 400]).toContain(response.status);
     expect(response.body.error).toMatch(/INVALID_CREDENTIALS|identifiants/i);
@@ -109,7 +112,7 @@ describe("Routes Authentication", () => {
   it("AUTH-06 — devrait rejeter connexion si pseudo inconnu", async () => {
     const response = await request(app)
       .post("/auth/login")
-      .send({ username: "fantome", password: "n'importe" });
+      .send({ username: "nonexistent", password: "anypass" });
 
     expect([401, 400]).toContain(response.status);
     // Message générique par sécurité (même que mauvais mot de passe)
@@ -118,17 +121,16 @@ describe("Routes Authentication", () => {
 
   // SCENARIO AUTH-07 — Déconnexion
   it("AUTH-07 — devrait déconnecter utilisateur et invalider session", async () => {
-    const password = "Secure!99";
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(TEST_PASSWORD, 10);
     db.prepare("INSERT INTO users (username, password) VALUES (?, ?)").run(
-      "pilote42",
+      TEST_USERNAME,
       hashedPassword,
     );
 
     // D'abord se connecter
     const loginResponse = await request(app)
       .post("/auth/login")
-      .send({ username: "pilote42", password });
+      .send({ username: TEST_USERNAME, password: TEST_PASSWORD });
 
     expect([302, 200]).toContain(loginResponse.status);
 
@@ -177,7 +179,7 @@ describe("Routes Authentication", () => {
     // mais le chemin de try-catch est couvert implicitement
     const response = await request(app)
       .post("/auth/register")
-      .send({ username: "test", password: "pass" });
+      .send({ username: "testuser2", password: "testpass" });
 
     // Soit succès (201) soit erreur (400/409/500)
     expect([201, 400, 409, 500]).toContain(response.status);
