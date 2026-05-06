@@ -1,10 +1,11 @@
+import path from "node:path";
 import express from "express";
 import session from "express-session";
 import { createAuthRouter } from "./routes/auth.js";
 import { createGameRouter } from "./routes/game.js";
 import { requireAuth, attachUserId } from "./middleware/auth.js";
 import { formatHorses } from "./engine/format.js";
-import { UPGRADE_CATALOG } from "./engine/upgrades.js";
+import { PERMANENT_UPGRADES, UPGRADE_CATALOG } from "./engine/upgrades.js";
 import { loadGameState, saveGameState } from "./db/gameStateRepo.js";
 import { createDefaultState } from "./engine/state.js";
 
@@ -33,6 +34,7 @@ export function createApp(db) {
   // Middleware pour parser JSON
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(express.static(path.resolve("src/public")));
 
   // Vue engine
   app.set("view engine", "ejs");
@@ -54,7 +56,9 @@ export function createApp(db) {
     // Seed du GameState pour les tests E2E
     app.post("/__test__/seed", (req, res) => {
       const userId = req.session?.userId;
-      if (!userId) return res.status(401).json({ error: "UNAUTHORIZED" });
+      if (!userId) {
+        return res.status(401).json({ error: "UNAUTHORIZED" });
+      }
       const current = loadGameState(db, userId) ?? createDefaultState(userId);
       const merged = { ...current, ...req.body };
       saveGameState(db, userId, merged);
@@ -69,7 +73,12 @@ export function createApp(db) {
   app.get("/", requireAuth, (req, res) => {
     const userId = req.session.userId;
     const state = loadGameState(db, userId) ?? createDefaultState(userId);
-    res.render("index", { state, catalog: UPGRADE_CATALOG, formatHorses });
+    res.render("index", {
+      state,
+      catalog: UPGRADE_CATALOG,
+      permanentUpgrades: PERMANENT_UPGRADES,
+      formatHorses,
+    });
   });
 
   // Route 404

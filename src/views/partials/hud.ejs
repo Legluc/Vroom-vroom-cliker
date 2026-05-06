@@ -1,26 +1,68 @@
 <div class="hud" id="hud">
-  <div class="hud-item">
-    <span class="hud-label">🐴 Chevaux</span>
-    <span class="hud-value" id="horse-count-display" data-testid="horse-count"><%- formatHorses(state.horses) %></span>
-  </div>
-  <div class="hud-item">
-    <span class="hud-label">⚡ Puissance/clic</span>
-    <span class="hud-value" id="click-power-display" data-testid="click-power"><%= state.clickPower %></span>
-  </div>
-  <% if (state.engineDisplay) { %>
-  <div class="hud-item">
-    <span class="hud-label">🔧 Moteur</span>
-    <span class="hud-value" id="engine-display" data-testid="engine-display"><%= state.engineDisplay %></span>
-  </div>
-  <% } else { %>
-  <div class="hud-item" style="display:none">
-    <span class="hud-label">🔧 Moteur</span>
-    <span class="hud-value" id="engine-display" data-testid="engine-display"></span>
-  </div>
-  <% } %>
-  <div class="hud-item">
-    <form action="/auth/logout" method="POST" style="display:inline">
-      <button type="submit" class="logout-btn" data-testid="logout-btn">Déconnecter</button>
-    </form>
-  </div>
+    <div class="hud-brand">
+        <span class="hud-brand-kicker">Garage & progression</span>
+        <h1 class="hud-brand-title">Vroom Vroom Clicker</h1>
+        <p class="hud-brand-subtitle">Pilote les chevaux, les niveaux et les pièces installées en temps réel.</p>
+    </div>
+
+    <div class="hud-stats">
+        <article class="hud-card hud-card--primary">
+            <span class="hud-label">Chevaux</span>
+            <strong class="hud-value" id="horse-count-display" data-testid="horse-count"><%- formatHorses(state.horses)
+                    %></strong>
+            <span class="hud-note">Total gagné: <span id="total-earned-display"><%- formatHorses(state.totalHorsesEarned
+                        || 0) %></span></span>
+        </article>
+
+        <article class="hud-card">
+            <span class="hud-label">Puissance de clic</span>
+            <strong class="hud-value" id="click-power-display" data-testid="click-power">
+                <%= state.clickPower %>
+            </strong>
+            <span class="hud-note">Pulses par clic manuel</span>
+        </article>
+
+        <article class="hud-card">
+            <span class="hud-label">CPS passif</span>
+            <strong class="hud-value" id="passive-cps-display" data-testid="passive-cps">
+                <%= state.cps || 0 %>
+            </strong>
+            <span class="hud-note">Production automatique par seconde</span>
+        </article>
+
+        <article class="hud-card">
+            <span class="hud-label">Progression</span>
+            <strong class="hud-value" id="upgrade-count-display" data-testid="upgrade-count">
+                <%= (state.upgrades || []).length + (state.permanentUpgrades || []).length %>
+            </strong>
+            <span class="hud-note">Upgrades achetés au total</span>
+        </article>
+
+        <article class="hud-card" id="engine-card">
+            <span class="hud-label">Moteur installé</span>
+            <% if (state.engineDisplay) { %>
+                <strong class="hud-value" id="engine-display" data-testid="engine-display">
+                    <%= state.engineDisplay %>
+                </strong>
+                <span class="hud-note">Affichage actuel du bloc moteur</span>
+                <% } else { %>
+                    <strong class="hud-value is-hidden" id="engine-display" data-testid="engine-display">—</strong>
+                    <span class="hud-note">Aucun moteur installé pour l’instant</span>
+                    <% } %>
+        </article>
+    </div>
+
+    <div class="hud-side">
+        <div class="hud-tag">
+            <span>Dernière sauvegarde</span>
+            <strong>
+                <%= state.lastSavedAt ? new Date(state.lastSavedAt).toLocaleString('fr-FR') : 'jamais' %>
+            </strong>
+        </div>
+        <div class="logout-form">
+            <form action="/auth/logout" method="POST">
+                <button type="submit" class="logout-btn" data-testid="logout-btn">Déconnexion</button>
+            </form>
+        </div>
+    </div>
 </div>

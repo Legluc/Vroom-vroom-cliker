@@ -1,179 +1,272 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vroom Vroom Clicker</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
+    <link rel="stylesheet" href="/garage.css" />
+</head>
 
-      /* HUD */
-      .hud { display: flex; align-items: center; gap: 1.5rem; background: #16213e; padding: .8rem 1.5rem; flex-wrap: wrap; }
-      .hud-item { display: flex; flex-direction: column; align-items: center; }
-      .hud-label { font-size: .7rem; color: #aaa; text-transform: uppercase; }
-      .hud-value { font-size: 1.4rem; font-weight: bold; color: #e94560; }
-      .logout-btn { background: none; border: 1px solid #e94560; color: #e94560; padding: .3rem .8rem; border-radius: 4px; cursor: pointer; font-size: .85rem; margin-left: auto; }
-      .logout-btn:hover { background: #e94560; color: #fff; }
+<body>
+    <div class="app-shell">
+        <div class="page-frame">
+            <%- include('partials/hud', { state, formatHorses }) %>
 
-      /* Zone principale */
-      .game-container { display: flex; gap: 1rem; padding: 1rem; max-width: 1200px; margin: 0 auto; }
-      .game-left { flex: 0 0 320px; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-      .game-right { flex: 1; }
+                <main class="garage-layout">
+                    <section class="game-stage">
+                        <%- include('partials/events', { state }) %>
+                            <button class="click-btn" data-testid="click-button" id="click-button"
+                                onclick="handleClick()" aria-label="Cliquer pour gagner des chevaux">🏎️</button>
+                    </section>
 
-      /* Bouton clic */
-      .click-btn {
-        width: 200px; height: 200px; border-radius: 50%;
-        background: radial-gradient(circle, #e94560, #c73652);
-        border: 4px solid #ff6b6b; cursor: pointer; font-size: 3rem;
-        transition: transform .1s, box-shadow .1s;
-        box-shadow: 0 0 20px rgba(233,69,96,.5);
-        display: flex; align-items: center; justify-content: center;
-      }
-      .click-btn:active { transform: scale(.95); box-shadow: 0 0 10px rgba(233,69,96,.3); }
-
-      /* Événements */
-      .events-container { margin-bottom: 1rem; width: 100%; }
-      .event-banner {
-        display: flex; align-items: center; gap: .8rem;
-        padding: .7rem 1.2rem; border-radius: 6px; margin-bottom: .5rem;
-      }
-      .event-bonus { background: #1a472a; border-left: 4px solid #2ecc71; }
-      .event-malus { background: #4a1a1a; border-left: 4px solid #e94560; }
-      .event-icon { font-size: 1.3rem; }
-      .event-label { font-weight: bold; flex: 1; }
-      .event-countdown { font-size: .85rem; color: #aaa; }
-      .event-resolve-btn {
-        background: #e94560; color: #fff; border: none;
-        padding: .4rem .9rem; border-radius: 4px; cursor: pointer; font-size: .85rem;
-      }
-      .event-resolve-btn:hover { background: #c73652; }
-
-      /* Upgrades */
-      .upgrades-panel h2 { margin-bottom: .8rem; color: #e94560; }
-      .upgrade-category { margin-bottom: 1.5rem; }
-      .upgrade-category h3 { margin-bottom: .5rem; font-size: .95rem; color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; }
-      .upgrade-list { display: flex; flex-direction: column; gap: .4rem; }
-      .upgrade-item { display: flex; align-items: center; gap: .5rem; background: #16213e; padding: .5rem .8rem; border-radius: 5px; }
-      .upgrade-item.owned { opacity: .6; }
-      .upgrade-name { flex: 1; font-size: .9rem; }
-      .upgrade-cost { font-size: .8rem; color: #aaa; }
-      .upgrade-btn {
-        background: #0f3460; border: 1px solid #e94560; color: #eee;
-        padding: .3rem .7rem; border-radius: 4px; cursor: pointer; font-size: .8rem;
-      }
-      .upgrade-btn:disabled { opacity: .4; cursor: not-allowed; }
-      .upgrade-btn:not(:disabled):hover { background: #e94560; }
-      .upgrade-owned-mark { font-size: 1rem; }
-    </style>
-  </head>
-  <body>
-    <%- include('partials/hud', { state, formatHorses }) %>
-
-    <div class="game-container">
-      <div class="game-left">
-        <%- include('partials/events', { state }) %>
-        <button
-          class="click-btn"
-          data-testid="click-button"
-          id="click-button"
-          onclick="handleClick()"
-          aria-label="Cliquer pour gagner des chevaux"
-        >🏎️</button>
-      </div>
-      <div class="game-right">
-        <%- include('partials/upgrades', { state, catalog }) %>
-      </div>
+                    <section class="garage-panel">
+                        <%- include('partials/upgrades', { state, catalog, permanentUpgrades }) %>
+                    </section>
+                </main>
+        </div>
     </div>
 
     <script>
-      let clientState = <%- JSON.stringify(state) %>;
+        let clientState = <% - JSON.stringify(state) %>;
+        const upgradeCatalog = <% - JSON.stringify(catalog) %>;
+        const permanentUpgradeCatalog = <% - JSON.stringify(permanentUpgrades) %>;
 
-      function fmt(n) {
-        if (n >= 1e9) return Math.floor(n / 1e9) + 'MM';
-        if (n >= 1e6) return Math.floor(n / 1e6) + 'M';
-        if (n >= 1e3) return Math.floor(n / 1e3) + 'K';
-        return String(Math.floor(n));
-      }
-
-      function updateHUD(newState) {
-        clientState = { ...clientState, ...newState };
-        document.getElementById('horse-count-display').textContent = fmt(clientState.horses);
-        document.getElementById('click-power-display').textContent = clientState.clickPower;
-        if (clientState.engineDisplay) {
-          const ed = document.getElementById('engine-display');
-          ed.textContent = clientState.engineDisplay;
-          ed.parentElement.style.display = '';
+        function fmt(value) {
+            if (value >= 1e9) return `${Math.floor(value / 1e9)}MM`;
+            if (value >= 1e6) return `${Math.floor(value / 1e6)}M`;
+            if (value >= 1e3) return `${Math.floor(value / 1e3)}K`;
+            return `${Math.floor(value)}`;
         }
-      }
 
-      async function handleClick() {
-        // Bloquer si POLICE_CONTROL actif
-        if (clientState.activeEvent && clientState.activeEvent.type === 'POLICE_CONTROL') return;
-        try {
-          const resp = await fetch('/game/click', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-          if (!resp.ok) return;
-          const data = await resp.json();
-          updateHUD(data);
-        } catch (e) { /* réseau */ }
-      }
+        function getOwnedTierMap(state) {
+            const map = {};
+            for (const upgrade of state.upgrades ?? []) {
+                const current = map[upgrade.categoryId];
+                if (!current || Number(upgrade.tierId) > Number(current.tierId)) {
+                    map[upgrade.categoryId] = upgrade;
+                }
+            }
+            return map;
+        }
 
-      async function buyUpgrade(categoryId, tierId) {
-        try {
-          const resp = await fetch('/game/upgrade', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categoryId, tierId }),
-          });
-          if (!resp.ok) return;
-          window.location.reload();
-        } catch (e) { /* réseau */ }
-      }
+        function getOwnedPermanentSet(state) {
+            return new Set((state.permanentUpgrades ?? []).map((entry) => entry.upgradeId));
+        }
 
-      async function resolveEvent() {
-        try {
-          const resp = await fetch('/game/event/resolve', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
-          if (!resp.ok) return;
-          clientState.activeEvent = null;
-          document.getElementById('events-container').innerHTML = '';
-        } catch (e) { /* réseau */ }
-      }
+        function getSortedTiers(categoryId) {
+            return Object.entries(upgradeCatalog[categoryId].tiers)
+                .map(([tierId, tier]) => ({ tierId: Number(tierId), ...tier }))
+                .sort((left, right) => left.tierId - right.tierId);
+        }
 
-      // Compte à rebours événement
-      function startCountdown() {
-        const el = document.getElementById('event-countdown');
-        const banner = document.querySelector('[data-testid="event-banner"]');
-        if (!el || !banner) return;
-        const expiresAt = parseInt(banner.dataset.expiresAt, 10);
-        if (!expiresAt) return;
+        function getCurrentTierInfo(categoryId, ownedMap) {
+            const category = upgradeCatalog[categoryId];
+            const ownedUpgrade = ownedMap[categoryId];
+            const sortedTiers = getSortedTiers(categoryId);
+            const currentTierId = ownedUpgrade ? Number(ownedUpgrade.tierId) : sortedTiers[0].tierId;
+            const currentTier = category.tiers[currentTierId] ?? sortedTiers[0];
+            const nextTier = sortedTiers.find((entry) => entry.tierId > currentTierId) ?? null;
+            return { currentTierId, currentTier, nextTier };
+        }
 
-        const tick = () => {
-          const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
-          el.textContent = remaining + 's';
-          if (remaining <= 0) {
-            banner.remove();
-            clearInterval(timer);
-            clientState.activeEvent = null;
-          }
-        };
-        tick();
-        const timer = setInterval(tick, 500);
-      }
-      startCountdown();
+        function updateHUD(newState) {
+            clientState = { ...clientState, ...newState };
 
-      // Tick passif toutes les secondes
-      setInterval(async () => {
-        try {
-          const resp = await fetch('/game/tick', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ now: Date.now() }),
-          });
-          if (!resp.ok) return;
-          const data = await resp.json();
-          updateHUD(data);
-        } catch (e) { /* réseau */ }
-      }, 1000);
+            const horsesDisplay = document.getElementById('horse-count-display');
+            const totalEarnedDisplay = document.getElementById('total-earned-display');
+            const clickPowerDisplay = document.getElementById('click-power-display');
+            const passiveCpsDisplay = document.getElementById('passive-cps-display');
+            const upgradeCountDisplay = document.getElementById('upgrade-count-display');
+            const engineDisplay = document.getElementById('engine-display');
+
+            if (horsesDisplay) horsesDisplay.textContent = fmt(clientState.horses ?? 0);
+            if (totalEarnedDisplay) totalEarnedDisplay.textContent = fmt(clientState.totalHorsesEarned ?? 0);
+            if (clickPowerDisplay) clickPowerDisplay.textContent = `${clientState.clickPower ?? 1}`;
+            if (passiveCpsDisplay) passiveCpsDisplay.textContent = `${clientState.cps ?? 0}`;
+            if (upgradeCountDisplay) {
+                const count = (clientState.upgrades ?? []).length + (clientState.permanentUpgrades ?? []).length;
+                upgradeCountDisplay.textContent = `${count}`;
+            }
+            if (engineDisplay) {
+                const engineValue = clientState.engineDisplay ?? '—';
+                engineDisplay.textContent = engineValue;
+                engineDisplay.closest('.hud-card')?.classList.toggle('is-hidden', !clientState.engineDisplay);
+            }
+        }
+
+        function refreshUpgradeSummaryCards() {
+            const ownedMap = getOwnedTierMap(clientState);
+            const ownedPermanent = getOwnedPermanentSet(clientState);
+
+            document.querySelectorAll('[data-upgrade-category]').forEach((card) => {
+                const categoryId = card.dataset.upgradeCategory;
+                const { currentTierId, currentTier, nextTier } = getCurrentTierInfo(categoryId, ownedMap);
+                const image = card.querySelector('[data-current-upgrade-image]');
+                const label = card.querySelector('[data-current-upgrade-label]');
+                const tierBadge = card.querySelector('[data-current-upgrade-tier]');
+                const description = card.querySelector('[data-current-upgrade-description]');
+                const nextName = card.querySelector('[data-next-upgrade-name]');
+                const nextCost = card.querySelector('[data-next-upgrade-cost]');
+
+                if (image) {
+                    image.src = `/upgrades/${categoryId}/tier-${currentTierId}.svg`;
+                    image.onerror = function onError() {
+                        this.onerror = null;
+                        this.src = '/upgrades/placeholder.svg';
+                    };
+                }
+
+                if (label) label.textContent = currentTier?.display ?? 'Palier inconnu';
+                if (tierBadge) tierBadge.textContent = `Niv. ${currentTierId}`;
+                if (description) {
+                    description.textContent = nextTier
+                        ? `Prochain visuel : ${nextTier.display}`
+                        : 'Dernier palier atteint pour cette catégorie.';
+                }
+                if (nextName) nextName.textContent = nextTier ? nextTier.display : 'Maximum atteint';
+                if (nextCost) nextCost.textContent = nextTier ? `${fmt(nextTier.cost)} 🐴` : '—';
+            });
+
+            document.querySelectorAll('[data-tier-button]').forEach((button) => {
+                const categoryId = button.dataset.category;
+                const tierId = Number(button.dataset.tier);
+                const tierDefinition = upgradeCatalog[categoryId].tiers[tierId];
+                const owned = (clientState.upgrades ?? []).some(
+                    (entry) => entry.categoryId === categoryId && Number(entry.tierId) === tierId,
+                );
+                const highestOwned = getOwnedTierMap(clientState)[categoryId];
+                const nextRequiredTier = highestOwned
+                    ? getSortedTiers(categoryId).find((entry) => entry.tierId > Number(highestOwned.tierId))?.tierId
+                    : getSortedTiers(categoryId)[0].tierId;
+                const isLocked = !owned && tierId !== nextRequiredTier;
+                const canAfford = (clientState.horses ?? 0) >= tierDefinition.cost;
+
+                button.disabled = owned || isLocked || !canAfford;
+                button.textContent = owned
+                    ? 'Installé'
+                    : isLocked
+                        ? 'Verrouillé'
+                        : `Installer · ${fmt(tierDefinition.cost)} 🐴`;
+                button.closest('.tier-row')?.classList.toggle('is-owned', owned);
+            });
+
+            document.querySelectorAll('[data-permanent-button]').forEach((button) => {
+                const upgradeId = button.dataset.upgradeId;
+                const upgradeDefinition = permanentUpgradeCatalog.find((entry) => entry.upgradeId === upgradeId);
+                const owned = ownedPermanent.has(upgradeId);
+                const canAfford = upgradeDefinition ? (clientState.horses ?? 0) >= upgradeDefinition.cost : false;
+
+                button.disabled = owned || !canAfford;
+                button.textContent = owned
+                    ? 'Installé'
+                    : `Installer · ${fmt(upgradeDefinition?.cost ?? 0)} 🐴`;
+                button.closest('.permanent-card')?.classList.toggle('owned', owned);
+            });
+        }
+
+        function updateState(nextState) {
+            clientState = { ...clientState, ...nextState };
+            updateHUD(clientState);
+            refreshUpgradeSummaryCards();
+        }
+
+        async function handleClick() {
+            if (clientState.activeEvent && clientState.activeEvent.type === 'POLICE_CONTROL') return;
+            try {
+                const response = await fetch('/game/click', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!response.ok) return;
+                updateState(await response.json());
+            } catch (error) {
+                // réseau
+            }
+        }
+
+        async function buyUpgrade(categoryId, tierId) {
+            try {
+                const response = await fetch('/game/upgrade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoryId, tierId }),
+                });
+                if (!response.ok) return;
+                updateState(await response.json());
+            } catch (error) {
+                // réseau
+            }
+        }
+
+        async function buyPermanentUpgrade(upgradeId) {
+            try {
+                const response = await fetch('/game/permanent-upgrade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ upgradeId }),
+                });
+                if (!response.ok) return;
+                updateState(await response.json());
+            } catch (error) {
+                // réseau
+            }
+        }
+
+        async function resolveEvent() {
+            try {
+                const response = await fetch('/game/event/resolve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+                if (!response.ok) return;
+                updateState(await response.json());
+                const container = document.getElementById('events-container');
+                if (container) container.innerHTML = '';
+            } catch (error) {
+                // réseau
+            }
+        }
+
+        function startCountdown() {
+            const el = document.getElementById('event-countdown');
+            const banner = document.querySelector('[data-testid="event-banner"]');
+            if (!el || !banner) return;
+            const expiresAt = Number.parseInt(banner.dataset.expiresAt, 10);
+            if (!expiresAt) return;
+
+            const tick = () => {
+                const remaining = Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000));
+                el.textContent = `${remaining}s`;
+                if (remaining <= 0) {
+                    banner.remove();
+                    clearInterval(timer);
+                    clientState.activeEvent = null;
+                }
+            };
+
+            tick();
+            const timer = setInterval(tick, 500);
+        }
+
+        updateHUD(clientState);
+        refreshUpgradeSummaryCards();
+        startCountdown();
+
+        setInterval(async () => {
+            try {
+                const response = await fetch('/game/tick', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ now: Date.now() }),
+                });
+                if (!response.ok) return;
+                updateState(await response.json());
+            } catch (error) {
+                // réseau
+            }
+        }, 1000);
     </script>
-  </body>
+</body>
+
 </html>

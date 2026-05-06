@@ -1,45 +1,177 @@
-<%
-  // catalog est passé par la route :
-  // { admission: { tiers: { 1: {...}, 25: {...} } }, ... }
-  const categoryLabels = {
-    admission: '🌬️ Admission',
-    fuel: '⛽ Carburant',
-    exhaust: '💨 Échappement',
-    engine: '🔧 Bloc moteur',
-  };
-  const ownedSet = new Set((state.upgrades || []).map(u => u.categoryId + '-' + u.tierId));
-%>
-<div class="upgrades-panel" id="upgrades-panel">
-  <h2>Upgrades</h2>
-  <% for (const [catId, catDef] of Object.entries(catalog)) { %>
-    <div class="upgrade-category">
-      <h3><%= categoryLabels[catId] || catId %></h3>
-      <div class="upgrade-list">
-        <% for (const [tierId, tierDef] of Object.entries(catDef.tiers)) { %>
-          <%
-            const key = catId + '-' + tierId;
-            const owned = ownedSet.has(key);
-            const canAfford = state.horses >= tierDef.cost;
-          %>
-          <div class="upgrade-item <%= owned ? 'owned' : '' %>" data-testid="upgrade-item-<%= catId %>-<%= tierId %>">
-            <% if (owned) { %>
-              <span class="upgrade-owned-mark" data-testid="upgrade-owned-<%= catId %>-<%= tierId %>">✅</span>
-            <% } %>
-            <span class="upgrade-name"><%= tierDef.display %></span>
-            <span class="upgrade-cost"><%= tierDef.cost %> 🐴</span>
-            <button
-              class="upgrade-btn"
-              data-testid="upgrade-btn-<%= catId %>-<%= tierId %>"
-              data-category="<%= catId %>"
-              data-tier="<%= tierId %>"
-              onclick="buyUpgrade('<%= catId %>', <%= tierId %>)"
-              <%= (owned || !canAfford) ? 'disabled' : '' %>
-            >
-              <%= owned ? 'Possédé' : 'Acheter' %>
-            </button>
-          </div>
-        <% } %>
-      </div>
+<% const categoryLabels={ admission: 'Admission' , fuel: 'Carburant' , exhaust: 'Échappement' , engine: 'Bloc moteur' ,
+    }; const categoryIcons={ admission: '🌬️' , fuel: '⛽' , exhaust: '💨' , engine: '🔧' , }; const
+    ownedByCategory=Object.fromEntries( Object.entries(catalog).map(([categoryId])=> [
+    categoryId,
+    (state.upgrades || [])
+    .filter((upgrade) => upgrade.categoryId === categoryId)
+    .sort((left, right) => left.tierId - right.tierId),
+    ]),
+    );
+
+    const permanentOwnedSet = new Set(
+    (state.permanentUpgrades || []).map((upgrade) => upgrade.upgradeId),
+    );
+
+    const permanentUpgradeList = Object.entries(permanentUpgrades || {}).map(
+    ([upgradeId, upgradeDefinition]) => ({ upgradeId, ...upgradeDefinition }),
+    );
+    %>
+
+    <div class="upgrades-panel" id="upgrades-panel">
+        <div class="panel-header">
+            <div>
+                <h2>Atelier des upgrades</h2>
+                <p class="panel-subtitle">Chaque catégorie progresse par niveaux. Le visuel installé évolue à chaque
+                    palier.</p>
+            </div>
+            <div class="hud-tag">
+                <span>Balance actuelle</span>
+                <strong id="upgrade-balance-display"><%- formatHorses(state.horses || 0) %></strong>
+            </div>
+        </div>
+
+        <div class="upgrade-grid">
+            <% for (const [categoryId, categoryDefinition] of Object.entries(catalog)) { %>
+                <% const tierEntries=Object.entries(categoryDefinition.tiers) .map(([tierId, tierDefinition])=> ({
+                    tierId: Number(tierId), ...tierDefinition }))
+                    .sort((left, right) => left.tierId - right.tierId);
+                    const ownedEntries = ownedByCategory[categoryId] || [];
+                    const currentTierId = ownedEntries.length ? Number(ownedEntries[ownedEntries.length - 1].tierId) :
+                    tierEntries[0].tierId;
+                    const currentTier = categoryDefinition.tiers[currentTierId] || tierEntries[0];
+                    const nextTier = tierEntries.find((entry) => entry.tierId > currentTierId) || null;
+                    %>
+                    <article class="upgrade-card" data-upgrade-category="<%= categoryId %>">
+                        <div class="upgrade-card__top">
+                            <div class="upgrade-art">
+                                <img class="upgrade-art-image" data-current-upgrade-image
+                                    src="/upgrades/<%= categoryId %>/tier-<%= currentTierId %>.svg"
+                                    alt="<%= categoryDefinition.label %>"
+                                    onerror="this.onerror=null;this.src='/upgrades/placeholder.svg';" />
+                                <span class="upgrade-art-badge" data-current-upgrade-tier>
+                                    <%= currentTierId %>
+                                </span>
+                            </div>
+
+                            <div class="upgrade-copy">
+                                <div class="upgrade-meta">
+                                    <span class="upgrade-icon">
+                                        <%= categoryIcons[categoryId] || '🔧' %>
+                                    </span>
+                                    <div>
+                                        <h3 data-current-upgrade-label>
+                                            <%= currentTier.display %>
+                                        </h3>
+                                        <p class="panel-subtitle">
+                                            <%= categoryLabels[categoryId] || categoryId %>
+                                        </p>
+                                    </div>
+                                </div>
+                                <p data-current-upgrade-description>
+                                    <%= nextTier ? `Prochain visuel : ${nextTier.display}`
+                                        : 'Dernier palier atteint pour cette catégorie.' %>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="upgrade-summary">
+                            <small>Pièce installée</small>
+                            <strong data-current-upgrade-name>
+                                <%= currentTier.display %>
+                            </strong>
+                            <span>Niveau actuel : <strong data-current-upgrade-level>
+                                    <%= currentTierId %>
+                                </strong></span>
+                            <span>Prochain palier : <strong data-next-upgrade-name>
+                                    <%= nextTier ? nextTier.display : 'Maximum atteint' %>
+                                </strong></span>
+                            <span>Coût suivant : <strong data-next-upgrade-cost>
+                                    <%= nextTier ? `${nextTier.cost} 🐴` : '—' %>
+                                </strong></span>
+                        </div>
+
+                        <div class="tier-list">
+                            <% for (const tierDefinition of tierEntries) { %>
+                                <% const owned=ownedEntries.some((entry)=> Number(entry.tierId) ===
+                                    tierDefinition.tierId);
+                                    const nextTierId = nextTier ? nextTier.tierId : null;
+                                    const locked = !owned && tierDefinition.tierId !== nextTierId;
+                                    const canAfford = (state.horses || 0) >= tierDefinition.cost;
+                                    %>
+                                    <div class="tier-row <%= owned ? 'is-owned' : '' %>">
+                                        <div class="tier-name">
+                                            <strong>
+                                                <%= tierDefinition.display %>
+                                            </strong>
+                                            <span>Niv. <%= tierDefinition.tierId %> · <%= tierDefinition.cost %>
+                                                        🐴</span>
+                                        </div>
+                                        <span class="tier-cost">
+                                            <%= tierDefinition.cost %> 🐴
+                                        </span>
+                                        <button class="upgrade-tier-btn" data-tier-button
+                                            data-category="<%= categoryId %>" data-tier="<%= tierDefinition.tierId %>"
+                                            data-cost="<%= tierDefinition.cost %>"
+                                            onclick="buyUpgrade('<%= categoryId %>', <%= tierDefinition.tierId %>)"
+                                            <%=(owned || locked || !canAfford) ? 'disabled' : '' %>
+                                            >
+                                            <%= owned ? 'Installé' : locked ? 'Verrouillé' : 'Installer' %>
+                                        </button>
+                                    </div>
+                                    <% } %>
+                        </div>
+                    </article>
+                    <% } %>
+        </div>
+
+        <section class="permanent-section">
+            <div class="permanent-header">
+                <h2>Upgrades permanentes</h2>
+                <p class="permanent-subtitle">Aucune évolution par niveau ici : ces bonus sont achetés une seule fois et
+                    gardent leur place dans le garage.</p>
+            </div>
+
+            <div class="permanent-grid">
+                <% for (const upgrade of permanentUpgradeList) { %>
+                    <article class="permanent-card <%= permanentOwnedSet.has(upgrade.upgradeId) ? 'owned' : '' %>"
+                        data-permanent-upgrade-id="<%= upgrade.upgradeId %>">
+                        <div class="permanent-card__top">
+                            <div class="permanent-art">
+                                <img src="/upgrades/permanent/<%= upgrade.upgradeId %>.svg" alt="<%= upgrade.name %>"
+                                    onerror="this.onerror=null;this.src='/upgrades/placeholder.svg';" />
+                            </div>
+                            <div class="permanent-copy">
+                                <div class="permanent-meta">
+                                    <span class="upgrade-icon">⭐</span>
+                                    <div>
+                                        <h3>
+                                            <%= upgrade.name %>
+                                        </h3>
+                                        <p class="permanent-cost">
+                                            <%= upgrade.cost %> 🐴
+                                        </p>
+                                    </div>
+                                </div>
+                                <p>
+                                    <%= upgrade.description %>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="permanent-foot">
+                            <span class="panel-subtitle">Placeholder d'image à renommer plus tard : <%= upgrade.imageKey
+                                    %></span>
+                            <button class="permanent-buy-btn" data-permanent-button
+                                data-upgrade-id="<%= upgrade.upgradeId %>" data-cost="<%= upgrade.cost %>"
+                                onclick="buyPermanentUpgrade('<%= upgrade.upgradeId %>')"
+                                <%=(permanentOwnedSet.has(upgrade.upgradeId) || (state.horses || 0) < upgrade.cost)
+                                ? 'disabled' : '' %>
+                                >
+                                <%= permanentOwnedSet.has(upgrade.upgradeId) ? 'Installé' : 'Installer' %>
+                            </button>
+                        </div>
+                    </article>
+                    <% } %>
+            </div>
+        </section>
     </div>
-  <% } %>
-</div>
