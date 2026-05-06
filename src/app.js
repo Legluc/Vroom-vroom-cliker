@@ -1,6 +1,7 @@
 import express from "express";
 import session from "express-session";
 import { createAuthRouter } from "./routes/auth.js";
+import { createGameRouter } from "./routes/game.js";
 import { requireAuth, attachUserId } from "./middleware/auth.js";
 
 /**
@@ -39,7 +40,18 @@ export function createApp(db) {
   // Routes publiques
   app.use("/auth", createAuthRouter(db));
 
-  // Routes protégées (nécessitent une session)
+  // Route d'injection de session pour les tests (désactivée en production)
+  if (process.env.NODE_ENV !== "production") {
+    app.post("/__test__/session", (req, res) => {
+      req.session.userId = req.body.userId;
+      res.status(200).json({ ok: true });
+    });
+  }
+
+  // Routes protégées du jeu
+  app.use("/game", requireAuth, createGameRouter(db));
+
+  // Route principale protégée
   app.get("/", requireAuth, (req, res) => {
     res.render("index");
   });
