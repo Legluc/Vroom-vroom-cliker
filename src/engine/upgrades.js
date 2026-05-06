@@ -2,151 +2,57 @@ const UPGRADE_CATALOG = {
   admission: {
     label: "Admission d'air",
     icon: "🌬️",
+    baseCost: 500,
+    costGrowth: 3,
     tiers: {
-      1: {
-        cost: 500,
-        display: "Filtre en papier usé",
-        imageKey: "admission-tier-1",
-      },
-      25: {
-        cost: 1_500,
-        display: "Cornet Sport KN",
-        imageKey: "admission-tier-25",
-      },
-      50: {
-        cost: 4_500,
-        display: "Entrée d'air sur le capot",
-        imageKey: "admission-tier-50",
-      },
-      100: {
-        cost: 12_000,
-        display: "Aspirateur industriel de chantier",
-        imageKey: "admission-tier-100",
-      },
-      250: {
-        cost: 30_000,
-        display: "Turbine de Boeing 747",
-        imageKey: "admission-tier-250",
-      },
-      500: {
-        cost: 90_000,
-        display: "Aspirateur de matière noire spatiale",
-        imageKey: "admission-tier-500",
-      },
+      1: { display: "Filtre en papier usé", imageKey: "admission-tier-1" },
+      25: { display: "Cornet Sport KN", imageKey: "admission-tier-25" },
+      50: { display: "Entrée d'air sur le capot", imageKey: "admission-tier-50" },
+      100: { display: "Aspirateur industriel de chantier", imageKey: "admission-tier-100" },
+      250: { display: "Turbine de Boeing 747", imageKey: "admission-tier-250" },
+      500: { display: "Aspirateur de matière noire spatiale", imageKey: "admission-tier-500" },
     },
   },
   fuel: {
     label: "Carburant / Injection",
     icon: "⛽",
+    baseCost: 750,
+    costGrowth: 3,
     tiers: {
-      1: {
-        cost: 750,
-        display: "Sans Plomb 95 coupé à l'eau",
-        imageKey: "fuel-tier-1",
-      },
-      25: {
-        cost: 2_250,
-        display: "Sans Plomb 98",
-        imageKey: "fuel-tier-25",
-      },
-      50: {
-        cost: 6_500,
-        display: "Ethanol 85",
-        imageKey: "fuel-tier-50",
-      },
-      100: {
-        cost: 18_000,
-        display: "Carburant de fusée",
-        imageKey: "fuel-tier-100",
-      },
-      250: {
-        cost: 45_000,
-        display: "Plutonium enrichi",
-        imageKey: "fuel-tier-250",
-      },
-      500: {
-        cost: 125_000,
-        display: "Jus de dinosaure pur concentré à 200%",
-        imageKey: "fuel-tier-500",
-      },
+      1: { display: "Sans Plomb 95 coupé à l'eau", imageKey: "fuel-tier-1" },
+      25: { display: "Sans Plomb 98", imageKey: "fuel-tier-25" },
+      50: { display: "Ethanol 85", imageKey: "fuel-tier-50" },
+      100: { display: "Carburant de fusée", imageKey: "fuel-tier-100" },
+      250: { display: "Plutonium enrichi", imageKey: "fuel-tier-250" },
+      500: { display: "Jus de dinosaure pur concentré à 200%", imageKey: "fuel-tier-500" },
     },
   },
   exhaust: {
     label: "Échappement",
     icon: "💨",
+    baseCost: 600,
+    costGrowth: 3,
     tiers: {
-      1: {
-        cost: 600,
-        display: "Pot percé de Twingo",
-        imageKey: "exhaust-tier-1",
-      },
-      25: {
-        cost: 2_700,
-        display: 'Ligne complète Inox "Full Tube"',
-        imageKey: "exhaust-tier-25",
-      },
-      50: {
-        cost: 7_500,
-        display: "Lance-flammes intégré",
-        imageKey: "exhaust-tier-50",
-      },
-      100: {
-        cost: 19_500,
-        display: "Orgue de Barbarie cracheur de feu",
-        imageKey: "exhaust-tier-100",
-      },
-      250: {
-        cost: 50_000,
-        display: "Trompette de Jéricho",
-        imageKey: "exhaust-tier-250",
-      },
-      500: {
-        cost: 140_000,
-        display: "Propulseur de navette spatiale",
-        imageKey: "exhaust-tier-500",
-      },
+      1: { display: "Pot percé de Twingo", imageKey: "exhaust-tier-1" },
+      25: { display: 'Ligne complète Inox "Full Tube"', imageKey: "exhaust-tier-25" },
+      50: { display: "Lance-flammes intégré", imageKey: "exhaust-tier-50" },
+      100: { display: "Orgue de Barbarie cracheur de feu", imageKey: "exhaust-tier-100" },
+      250: { display: "Trompette de Jéricho", imageKey: "exhaust-tier-250" },
+      500: { display: "Propulseur de navette spatiale", imageKey: "exhaust-tier-500" },
     },
   },
   engine: {
     label: "Bloc moteur",
     icon: "🔧",
+    baseCost: 1_000,
+    costGrowth: 3,
     tiers: {
-      1: {
-        cost: 1_000,
-        display: "Moteur de Tondeuse (Monocylindre)",
-        engineDisplay: "1-cyl",
-        imageKey: "engine-tier-1",
-      },
-      25: {
-        cost: 4_500,
-        display: "4 Cylindres en ligne",
-        engineDisplay: "4-cyl",
-        imageKey: "engine-tier-25",
-      },
-      50: {
-        cost: 12_000,
-        display: "Moteur V8 Américain",
-        engineDisplay: "V8",
-        imageKey: "engine-tier-50",
-      },
-      100: {
-        cost: 28_000,
-        display: "W16 de Bugatti",
-        engineDisplay: "W16",
-        imageKey: "engine-tier-100",
-      },
-      250: {
-        cost: 75_000,
-        display: "Moteur V128",
-        engineDisplay: "V128",
-        imageKey: "engine-tier-250",
-      },
-      500: {
-        cost: 220_000,
-        display: "Réacteur Rotatif Infini",
-        engineDisplay: "RÉACTEUR",
-        imageKey: "engine-tier-500",
-      },
+      1: { display: "Moteur de Tondeuse (Monocylindre)", engineDisplay: "1-cyl", imageKey: "engine-tier-1" },
+      25: { display: "4 Cylindres en ligne", engineDisplay: "4-cyl", imageKey: "engine-tier-25" },
+      50: { display: "Moteur V8 Américain", engineDisplay: "V8", imageKey: "engine-tier-50" },
+      100: { display: "W16 de Bugatti", engineDisplay: "W16", imageKey: "engine-tier-100" },
+      250: { display: "Moteur V128", engineDisplay: "V128", imageKey: "engine-tier-250" },
+      500: { display: "Réacteur Rotatif Infini", engineDisplay: "RÉACTEUR", imageKey: "engine-tier-500" },
     },
   },
 };
@@ -178,7 +84,7 @@ function createUpgradeError(code, message) {
   return error;
 }
 
-function getTierDefinition(categoryId, tierId) {
+function getSortedTierIds(categoryId) {
   const category = UPGRADE_CATALOG[categoryId];
 
   if (!category) {
@@ -188,16 +94,69 @@ function getTierDefinition(categoryId, tierId) {
     );
   }
 
-  const tier = category.tiers[tierId];
+  return Object.keys(category.tiers)
+    .map((tierId) => Number(tierId))
+    .sort((left, right) => left - right);
+}
 
-  if (!tier) {
+function getTierIndex(categoryId, tierId) {
+  const tierIds = getSortedTierIds(categoryId);
+  const numericTierId = Number(tierId);
+  const index = tierIds.indexOf(numericTierId);
+
+  if (index === -1) {
     throw createUpgradeError(
       "INVALID_TIER",
       `Unknown upgrade tier: ${categoryId}:${tierId}`,
     );
   }
 
-  return tier;
+  return index;
+}
+
+function getTierCost(categoryId, tierId) {
+  const category = UPGRADE_CATALOG[categoryId];
+
+  if (!category) {
+    throw createUpgradeError(
+      "INVALID_CATEGORY",
+      `Unknown upgrade category: ${categoryId}`,
+    );
+  }
+
+  const tierIndex = getTierIndex(categoryId, tierId);
+  const growth = category.costGrowth ?? 3;
+
+  return Math.round(category.baseCost * Math.pow(growth, tierIndex));
+}
+
+function enrichTier(categoryId, tierId) {
+  const category = UPGRADE_CATALOG[categoryId];
+  const tierDefinition = category?.tiers?.[tierId];
+
+  if (!category) {
+    throw createUpgradeError(
+      "INVALID_CATEGORY",
+      `Unknown upgrade category: ${categoryId}`,
+    );
+  }
+
+  if (!tierDefinition) {
+    throw createUpgradeError(
+      "INVALID_TIER",
+      `Unknown upgrade tier: ${categoryId}:${tierId}`,
+    );
+  }
+
+  return {
+    tierId: Number(tierId),
+    cost: getTierCost(categoryId, tierId),
+    ...tierDefinition,
+  };
+}
+
+function getTierDefinition(categoryId, tierId) {
+  return enrichTier(categoryId, tierId);
 }
 
 function getPermanentUpgradeDefinition(upgradeId) {
@@ -214,7 +173,7 @@ function getPermanentUpgradeDefinition(upgradeId) {
 }
 
 function getPurchaseCost(categoryId, tierId) {
-  return getTierDefinition(categoryId, tierId).cost;
+  return getTierCost(categoryId, tierId);
 }
 
 function getPermanentUpgradeCost(upgradeId) {
@@ -238,11 +197,8 @@ function getSortedTierEntries(categoryId) {
     return [];
   }
 
-  return Object.entries(category.tiers)
-    .map(([tierId, tierDefinition]) => ({
-      tierId: Number(tierId),
-      ...tierDefinition,
-    }))
+  return Object.keys(category.tiers)
+    .map((tierId) => enrichTier(categoryId, tierId))
     .sort((left, right) => left.tierId - right.tierId);
 }
 
@@ -267,10 +223,7 @@ function getCurrentTierDefinition(state, categoryId) {
     return sortedEntries[0] ?? null;
   }
 
-  return {
-    tierId,
-    ...getTierDefinition(categoryId, tierId),
-  };
+  return enrichTier(categoryId, tierId);
 }
 
 function getNextTierDefinition(state, categoryId) {
@@ -395,9 +348,31 @@ function getUpgradeCategories() {
     ...category,
     tiers: Object.entries(category.tiers).map(([tierId, tier]) => ({
       tierId: Number(tierId),
+      cost: getTierCost(categoryId, tierId),
       ...tier,
     })),
   }));
+}
+
+function getUpgradeCatalogViewModel() {
+  return Object.fromEntries(
+    Object.entries(UPGRADE_CATALOG).map(([categoryId, category]) => [
+      categoryId,
+      {
+        ...category,
+        tiers: Object.fromEntries(
+          Object.entries(category.tiers).map(([tierId, tier]) => [
+            tierId,
+            {
+              tierId: Number(tierId),
+              cost: getTierCost(categoryId, tierId),
+              ...tier,
+            },
+          ]),
+        ),
+      },
+    ]),
+  );
 }
 
 function getPermanentUpgradeList() {
@@ -419,6 +394,7 @@ export {
   getPermanentUpgradeDefinition,
   getPermanentUpgradeList,
   getPurchaseCost,
+  getUpgradeCatalogViewModel,
   getSortedTierEntries,
   getUpgradeCategories,
   hasPermanentUpgrade,

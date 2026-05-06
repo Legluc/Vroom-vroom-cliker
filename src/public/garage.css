@@ -65,6 +65,9 @@ body {
   box-shadow: var(--shadow);
   padding: 18px;
   margin-bottom: 20px;
+  position: sticky;
+  top: 20px;
+  z-index: 40;
 }
 
 .hud-brand {
@@ -186,7 +189,8 @@ body {
 
 .garage-layout {
   display: grid;
-  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+  /* Main game stage on the left, reserved upgrades column on the right */
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
   gap: 20px;
   align-items: start;
 }
@@ -201,8 +205,7 @@ body {
 
 .game-stage {
   padding: 20px;
-  position: sticky;
-  top: 20px;
+  position: relative;
 }
 
 .events-container {
@@ -280,6 +283,11 @@ body {
 
 .upgrades-panel {
   padding: 20px;
+  /* Keep upgrades visible on the right and allow internal scroll */
+  position: sticky;
+  top: 140px; /* sits below the HUD */
+  max-height: calc(100vh - 160px);
+  overflow: auto;
 }
 
 .panel-header {
@@ -309,8 +317,18 @@ body {
   gap: 16px;
 }
 
+.upgrade-columns {
+  display: grid;
+  gap: 18px;
+}
+
+.effect-group h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
+}
+
 .upgrade-grid {
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .permanent-grid {

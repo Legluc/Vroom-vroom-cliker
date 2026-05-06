@@ -5,7 +5,10 @@ import { createAuthRouter } from "./routes/auth.js";
 import { createGameRouter } from "./routes/game.js";
 import { requireAuth, attachUserId } from "./middleware/auth.js";
 import { formatHorses } from "./engine/format.js";
-import { PERMANENT_UPGRADES, UPGRADE_CATALOG } from "./engine/upgrades.js";
+import {
+  getPermanentUpgradeList,
+  getUpgradeCatalogViewModel,
+} from "./engine/upgrades.js";
 import { loadGameState, saveGameState } from "./db/gameStateRepo.js";
 import { createDefaultState } from "./engine/state.js";
 
@@ -75,8 +78,8 @@ export function createApp(db) {
     const state = loadGameState(db, userId) ?? createDefaultState(userId);
     res.render("index", {
       state,
-      catalog: UPGRADE_CATALOG,
-      permanentUpgrades: PERMANENT_UPGRADES,
+      catalog: getUpgradeCatalogViewModel(),
+      permanentUpgrades: getPermanentUpgradeList(),
       formatHorses,
     });
   });

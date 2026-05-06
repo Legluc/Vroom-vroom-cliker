@@ -28,9 +28,9 @@
     </div>
 
     <script>
-        let clientState = <% - JSON.stringify(state) %>;
-        const upgradeCatalog = <% - JSON.stringify(catalog) %>;
-        const permanentUpgradeCatalog = <% - JSON.stringify(permanentUpgrades) %>;
+        let clientState = <%- JSON.stringify(state) %>;
+        const upgradeCatalog = <%- JSON.stringify(catalog) %>;
+        const permanentUpgradeCatalog = <%- JSON.stringify(permanentUpgrades) %>;
 
         function fmt(value) {
             if (value >= 1e9) return `${Math.floor(value / 1e9)}MM`;

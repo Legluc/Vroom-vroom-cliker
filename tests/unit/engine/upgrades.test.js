@@ -124,6 +124,10 @@ describe("buyUpgrade", () => {
 
   it("retourne un coût positif pour un palier donné", () => {
     expect(getPurchaseCost("fuel", 100)).toBeGreaterThan(0);
+    expect(getPurchaseCost("admission", 1)).toBe(500);
+    expect(getPurchaseCost("admission", 25)).toBe(1_500);
+    expect(getPurchaseCost("admission", 50)).toBe(4_500);
+    expect(getPurchaseCost("engine", 100)).toBe(27_000);
   });
 
   it("gère le palier 500 avec le multiplicateur max", () => {
