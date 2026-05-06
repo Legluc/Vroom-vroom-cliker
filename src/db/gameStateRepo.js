@@ -39,8 +39,4 @@ function deleteGameState(db, userId) {
   db.prepare("DELETE FROM game_states WHERE user_id = ?").run(userId);
 }
 
-module.exports = {
-  deleteGameState,
-  loadGameState,
-  saveGameState,
-};
+export { deleteGameState, loadGameState, saveGameState };
