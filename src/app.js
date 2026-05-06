@@ -3,6 +3,10 @@ import session from "express-session";
 import { createAuthRouter } from "./routes/auth.js";
 import { createGameRouter } from "./routes/game.js";
 import { requireAuth, attachUserId } from "./middleware/auth.js";
+import { formatHorses } from "./engine/format.js";
+import { UPGRADE_CATALOG } from "./engine/upgrades.js";
+import { loadGameState, saveGameState } from "./db/gameStateRepo.js";
+import { createDefaultState } from "./engine/state.js";
 
 /**
  * Crée et configure l'application Express
@@ -40,11 +44,21 @@ export function createApp(db) {
   // Routes publiques
   app.use("/auth", createAuthRouter(db));
 
-  // Route d'injection de session pour les tests (désactivée en production)
+  // Routes d'injection pour les tests (désactivées en production)
   if (process.env.NODE_ENV !== "production") {
     app.post("/__test__/session", (req, res) => {
       req.session.userId = req.body.userId;
       res.status(200).json({ ok: true });
+    });
+
+    // Seed du GameState pour les tests E2E
+    app.post("/__test__/seed", (req, res) => {
+      const userId = req.session?.userId;
+      if (!userId) return res.status(401).json({ error: "UNAUTHORIZED" });
+      const current = loadGameState(db, userId) ?? createDefaultState(userId);
+      const merged = { ...current, ...req.body };
+      saveGameState(db, userId, merged);
+      res.json({ ok: true });
     });
   }
 
@@ -53,7 +67,9 @@ export function createApp(db) {
 
   // Route principale protégée
   app.get("/", requireAuth, (req, res) => {
-    res.render("index");
+    const userId = req.session.userId;
+    const state = loadGameState(db, userId) ?? createDefaultState(userId);
+    res.render("index", { state, catalog: UPGRADE_CATALOG, formatHorses });
   });
 
   // Route 404

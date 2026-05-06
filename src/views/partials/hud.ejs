@@ -1,0 +1,26 @@
+<div class="hud" id="hud">
+  <div class="hud-item">
+    <span class="hud-label">🐴 Chevaux</span>
+    <span class="hud-value" id="horse-count-display" data-testid="horse-count"><%- formatHorses(state.horses) %></span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-label">⚡ Puissance/clic</span>
+    <span class="hud-value" id="click-power-display" data-testid="click-power"><%= state.clickPower %></span>
+  </div>
+  <% if (state.engineDisplay) { %>
+  <div class="hud-item">
+    <span class="hud-label">🔧 Moteur</span>
+    <span class="hud-value" id="engine-display" data-testid="engine-display"><%= state.engineDisplay %></span>
+  </div>
+  <% } else { %>
+  <div class="hud-item" style="display:none">
+    <span class="hud-label">🔧 Moteur</span>
+    <span class="hud-value" id="engine-display" data-testid="engine-display"></span>
+  </div>
+  <% } %>
+  <div class="hud-item">
+    <form action="/auth/logout" method="POST" style="display:inline">
+      <button type="submit" class="logout-btn" data-testid="logout-btn">Déconnecter</button>
+    </form>
+  </div>
+</div>
