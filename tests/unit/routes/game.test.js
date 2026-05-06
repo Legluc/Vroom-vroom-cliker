@@ -394,6 +394,48 @@ describe("Routes Game", () => {
     expect(response.body.error).toBe("INSUFFICIENT_FUNDS");
   });
 
+  it("bonus — POST /game/permanent-upgrade ajoute un upgrade permanent", async () => {
+    const result = db
+      .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+      .run(TEST_USER.username, "hash");
+    const userId = result.lastInsertRowid;
+    saveGameState(db, userId, {
+      ...createDefaultState(userId),
+      horses: 20_000,
+    });
+
+    const agent = request.agent(app);
+    await agent.post("/__test__/session").send({ userId });
+
+    const response = await agent
+      .post("/game/permanent-upgrade")
+      .send({ upgradeId: "turbo_starter" });
+
+    expect(response.status).toBe(200);
+    expect(response.body.permanentUpgrades).toContainEqual(
+      expect.objectContaining({ upgradeId: "turbo_starter" }),
+    );
+  });
+
+  it("bonus — POST /game/permanent-upgrade sans upgradeId retourne 400", async () => {
+    const result = db
+      .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+      .run(TEST_USER.username, "hash");
+    const userId = result.lastInsertRowid;
+    saveGameState(db, userId, {
+      ...createDefaultState(userId),
+      horses: 20_000,
+    });
+
+    const agent = request.agent(app);
+    await agent.post("/__test__/session").send({ userId });
+
+    const response = await agent.post("/game/permanent-upgrade").send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe("INVALID_BODY");
+  });
+
   it("bonus — POST /game/autoclicker/upgrade avec fonds insuffisants retourne 400", async () => {
     const result = db
       .prepare("INSERT INTO users (username, password) VALUES (?, ?)")

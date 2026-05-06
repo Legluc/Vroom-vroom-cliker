@@ -1,8 +1,14 @@
 import {
+  buyPermanentUpgrade,
   buyUpgrade,
+  getCurrentTierDefinition,
   getClickPower,
+  getNextTierDefinition,
   getPassiveCps,
+  getPermanentUpgradeCost,
   getPurchaseCost,
+  hasPermanentUpgrade,
+  hasUpgrade,
 } from "../../../src/engine/upgrades.js";
 
 function createState(overrides = {}) {
@@ -28,6 +34,8 @@ describe("buyUpgrade", () => {
         expect.objectContaining({ categoryId: "admission", tierId: 1 }),
       ]),
     );
+    expect(nextState.clickPower).toBe(1);
+    expect(nextState.cps).toBe(0);
     expect(state.horses).toBe(10_000);
   });
 
@@ -68,49 +76,50 @@ describe("buyUpgrade", () => {
     );
   });
 
-  it("applique le multiplicateur clickPower pour Admission", () => {
+  it("ne modifie pas le clickPower pour Admission", () => {
     const state = createState({ horses: 10_000 });
 
     const nextState = buyUpgrade(state, "admission", 25);
 
-    expect(nextState.clickPower).toBe(1.5);
+    expect(nextState.clickPower).toBe(1);
   });
 
-  it("applique le multiplicateur cps pour Carburant", () => {
+  it("ne modifie pas le cps pour Carburant", () => {
     const state = createState({ horses: 10_000, cps: 10 });
 
     const nextState = buyUpgrade(state, "fuel", 50);
 
-    expect(nextState.cps).toBe(30);
-    expect(getPassiveCps(nextState)).toBe(30);
+    expect(nextState.cps).toBe(10);
+    expect(getPassiveCps(nextState)).toBe(10);
   });
 
-  it("applique le multiplicateur clickPower pour Échappement", () => {
-    const state = createState({ horses: 10_000 });
+  it("ne modifie pas le clickPower pour Échappement", () => {
+    const state = createState({ horses: 100_000 });
 
     const nextState = buyUpgrade(state, "exhaust", 100);
 
-    expect(nextState.clickPower).toBe(10);
+    expect(nextState.clickPower).toBe(1);
   });
 
-  it("applique le multiplicateur cps et le moteur affiché pour Bloc moteur", () => {
-    const state = createState({ horses: 10_000, cps: 10 });
+  it("met à jour uniquement l'affichage moteur pour Bloc moteur", () => {
+    const state = createState({ horses: 100_000, cps: 10 });
 
     const nextState = buyUpgrade(state, "engine", 50);
 
-    expect(nextState.cps).toBe(70);
+    expect(nextState.cps).toBe(10);
     expect(nextState.engineDisplay).toBe("V8");
   });
 
-  it("cumule plusieurs upgrades sur le clickPower", () => {
+  it("mémorise le dernier palier installé pour une catégorie", () => {
     const firstState = buyUpgrade(
       createState({ horses: 10_000 }),
       "admission",
       25,
     );
-    const secondState = buyUpgrade(firstState, "exhaust", 25);
+    const secondState = buyUpgrade(firstState, "admission", 50);
 
-    expect(getClickPower(secondState)).toBe(3);
+    expect(getCurrentTierDefinition(secondState, "admission").tierId).toBe(50);
+    expect(getNextTierDefinition(secondState, "admission").tierId).toBe(100);
   });
 
   it("retourne un coût positif pour un palier donné", () => {
@@ -127,7 +136,7 @@ describe("buyUpgrade", () => {
         expect.objectContaining({ categoryId: "admission", tierId: 500 }),
       ]),
     );
-    expect(nextState.clickPower).toBe(50);
+    expect(nextState.clickPower).toBe(1);
   });
 
   it("initialise clickPower à 1 si absent de l'état", () => {
@@ -135,7 +144,7 @@ describe("buyUpgrade", () => {
 
     const nextState = buyUpgrade(state, "admission", 1);
 
-    // clickPower doit être initialisé à 1 puis multiplié par 1.0
+    // clickPower doit être initialisé à 1 et rester inchangé
     expect(nextState.clickPower).toBe(1);
   });
 
@@ -144,7 +153,7 @@ describe("buyUpgrade", () => {
 
     const nextState = buyUpgrade(state, "fuel", 1);
 
-    // cps doit être initialisé à 0 puis multiplié
+    // cps doit être initialisé à 0 et rester inchangé
     expect(nextState.cps).toBe(0);
   });
 
@@ -175,5 +184,51 @@ describe("buyUpgrade", () => {
     const nextState = buyUpgrade(state, "admission", 1);
 
     expect(nextState.upgrades.length).toBe(1);
+    expect(hasUpgrade(nextState.upgrades, "admission", 1)).toBe(true);
+  });
+
+  it("n'ajoute pas de doublon quand le palier est déjà possédé", () => {
+    const state = createState({
+      horses: 10_000,
+      upgrades: [{ categoryId: "admission", tierId: 1 }],
+    });
+
+    expect(hasUpgrade(state.upgrades, "admission", 1)).toBe(true);
+  });
+});
+
+describe("buyPermanentUpgrade", () => {
+  it("achète un upgrade permanent sans toucher aux stats", () => {
+    const state = createState({ horses: 20_000 });
+
+    const nextState = buyPermanentUpgrade(state, "turbo_starter");
+
+    expect(nextState.horses).toBe(16_500);
+    expect(nextState.permanentUpgrades).toContainEqual(
+      expect.objectContaining({ upgradeId: "turbo_starter" }),
+    );
+    expect(nextState.clickPower).toBe(1);
+    expect(nextState.cps).toBe(0);
+  });
+
+  it("refuse un upgrade permanent déjà acheté", () => {
+    const state = createState({
+      horses: 20_000,
+      permanentUpgrades: [{ upgradeId: "turbo_starter" }],
+    });
+
+    expect(() => buyPermanentUpgrade(state, "turbo_starter")).toThrowError(
+      expect.objectContaining({ code: "ALREADY_OWNED" }),
+    );
+  });
+
+  it("retourne un coût positif pour un upgrade permanent", () => {
+    expect(getPermanentUpgradeCost("turbo_starter")).toBeGreaterThan(0);
+  });
+
+  it("hasPermanentUpgrade détecte correctement une possession", () => {
+    expect(
+      hasPermanentUpgrade([{ upgradeId: "turbo_starter" }], "turbo_starter"),
+    ).toBe(true);
   });
 });

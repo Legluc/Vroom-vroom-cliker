@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { processClick } from "../engine/click.js";
-import { buyUpgrade } from "../engine/upgrades.js";
+import { buyPermanentUpgrade, buyUpgrade } from "../engine/upgrades.js";
 import {
   buyAutoclicker,
   upgradeAutoclicker,
@@ -58,6 +58,30 @@ export function createGameRouter(db) {
 
     try {
       const newState = buyUpgrade(state, categoryId, Number(tierId));
+      saveGameState(db, userId, newState);
+      return res.json(newState);
+    } catch (err) {
+      const code = err.code ?? err.message;
+      if (code === "INSUFFICIENT_FUNDS") {
+        return res.status(400).json({ error: "INSUFFICIENT_FUNDS" });
+      }
+      return res.status(400).json({ error: code });
+    }
+  });
+
+  // POST /game/permanent-upgrade — achète un upgrade permanent
+  router.post("/permanent-upgrade", (req, res) => {
+    const { upgradeId } = req.body ?? {};
+
+    if (!upgradeId) {
+      return res.status(400).json({ error: "INVALID_BODY" });
+    }
+
+    const userId = req.session.userId;
+    const state = getState(userId);
+
+    try {
+      const newState = buyPermanentUpgrade(state, upgradeId);
       saveGameState(db, userId, newState);
       return res.json(newState);
     } catch (err) {

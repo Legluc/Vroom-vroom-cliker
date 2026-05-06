@@ -22,6 +22,9 @@ const DEFAULT_STATE = {
   // Upgrades possédées
   upgrades: [], // [{ categoryId, tierId, purchasedAt }]
 
+  // Upgrades permanentes
+  permanentUpgrades: [], // [{ upgradeId, purchasedAt }]
+
   // Événement actif (null si aucun)
   activeEvent: null, // { type, multiplier, expiresAt, requiresAction }
 
