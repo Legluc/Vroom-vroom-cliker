@@ -1,196 +1,229 @@
 const UPGRADE_CATALOG = {
   admission: {
-    baseCost: 500,
-    growthRate: 3,
-    effect: "clickPower",
-    tiers: [
-      { tierId: 1, multiplier: 1, label: "Filtre en papier usé" },
-      { tierId: 25, multiplier: 1.5, label: "Conduit sport" },
-      { tierId: 50, multiplier: 2.5, label: "Entrée d'air sur le capot" },
-      { tierId: 100, multiplier: 5, label: "Aspirateur industriel (bricolé)" },
-      { tierId: 250, multiplier: 15, label: "Turbine (type avion)" },
-      { tierId: 500, multiplier: 50, label: "Aspirateur de matière noire" },
-    ],
+    tiers: {
+      1: {
+        cost: 500,
+        clickPowerMultiplier: 1,
+        display: "Filtre en papier usé",
+      },
+      25: { cost: 2500, clickPowerMultiplier: 1.5, display: "Conduit sport" },
+      50: {
+        cost: 5000,
+        clickPowerMultiplier: 2.5,
+        display: "Entrée d'air sur le capot",
+      },
+      100: {
+        cost: 12500,
+        clickPowerMultiplier: 5,
+        display: "Aspirateur industriel (bricolé)",
+      },
+      250: {
+        cost: 35000,
+        clickPowerMultiplier: 15,
+        display: "Turbine (type avion)",
+      },
+      500: {
+        cost: 100000,
+        clickPowerMultiplier: 50,
+        display: "Aspirateur de matière noire",
+      },
+    },
   },
   fuel: {
-    baseCost: 750,
-    growthRate: 3,
-    effect: "cps",
-    tiers: [
-      { tierId: 1, multiplier: 1, label: "Sans Plomb 95 (dilué)" },
-      { tierId: 25, multiplier: 1.5, label: "Sans Plomb 98" },
-      { tierId: 50, multiplier: 3, label: "Méthanol 85" },
-      { tierId: 100, multiplier: 8, label: "Carburant de fusée" },
-      { tierId: 250, multiplier: 25, label: "Plutonium enrichi" },
-      { tierId: 500, multiplier: 100, label: "Jus de dinosaure concentré ×200" },
-    ],
+    tiers: {
+      1: { cost: 750, cpsMultiplier: 1, display: "Sans Plomb 95 (dilué)" },
+      25: { cost: 3500, cpsMultiplier: 1.5, display: "Sans Plomb 98" },
+      50: { cost: 7500, cpsMultiplier: 3, display: "Méthanol 85" },
+      100: { cost: 20000, cpsMultiplier: 8, display: "Carburant de fusée" },
+      250: { cost: 60000, cpsMultiplier: 25, display: "Plutonium enrichi" },
+      500: {
+        cost: 160000,
+        cpsMultiplier: 100,
+        display: "Jus de dinosaure concentré ×200",
+      },
+    },
   },
   exhaust: {
-    baseCost: 650,
-    growthRate: 3,
-    effect: "clickPower",
-    tiers: [
-      { tierId: 1, multiplier: 1, label: "Pot percé (Twingo)" },
-      { tierId: 25, multiplier: 2, label: "Ligne complète inox \"Full Tube\"" },
-      { tierId: 50, multiplier: 4, label: "Lance-flammes intégré" },
-      { tierId: 100, multiplier: 10, label: "Orgue / cracheur de feu" },
-      { tierId: 250, multiplier: 30, label: "Trompette surpuissante" },
-      { tierId: 500, multiplier: 100, label: "Propulseur de navette spatiale" },
-    ],
+    tiers: {
+      1: { cost: 600, clickPowerMultiplier: 1, display: "Pot percé (Twingo)" },
+      25: {
+        cost: 3000,
+        clickPowerMultiplier: 2,
+        display: 'Ligne complète inox "Full Tube"',
+      },
+      50: {
+        cost: 6500,
+        clickPowerMultiplier: 4,
+        display: "Lance-flammes intégré",
+      },
+      100: {
+        cost: 8000,
+        clickPowerMultiplier: 10,
+        display: "Orgue / cracheur de feu",
+      },
+      250: {
+        cost: 42000,
+        clickPowerMultiplier: 30,
+        display: "Trompette surpuissante",
+      },
+      500: {
+        cost: 120000,
+        clickPowerMultiplier: 100,
+        display: "Propulseur de navette spatiale",
+      },
+    },
   },
   engine: {
-    baseCost: 900,
-    growthRate: 3.2,
-    effect: "cps",
-    tiers: [
-      { tierId: 1, multiplier: 1, display: "1-cyl", label: "Moteur de tondeuse (monocylindre)" },
-      { tierId: 25, multiplier: 3, display: "4-cyl", label: "4 cylindres en ligne" },
-      { tierId: 50, multiplier: 7, display: "V8", label: "Moteur V8 américain" },
-      { tierId: 100, multiplier: 20, display: "V10", label: "V10 (Bugatti)" },
-      { tierId: 250, multiplier: 60, display: "V12", label: "V12 (prend la moitié de la voiture)" },
-      { tierId: 500, multiplier: 200, display: "RÉACTEUR", label: "Réacteur/rotor expérimental" },
-    ],
+    tiers: {
+      1: {
+        cost: 1000,
+        cpsMultiplier: 1,
+        engineDisplay: "1-cyl",
+        display: "Moteur de tondeuse (monocylindre)",
+      },
+      25: {
+        cost: 5000,
+        cpsMultiplier: 3,
+        engineDisplay: "4-cyl",
+        display: "4 cylindres en ligne",
+      },
+      50: {
+        cost: 9000,
+        cpsMultiplier: 7,
+        engineDisplay: "V8",
+        display: "Moteur V8 américain",
+      },
+      100: {
+        cost: 30000,
+        cpsMultiplier: 20,
+        engineDisplay: "V10",
+        display: "V10 (Bugatti)",
+      },
+      250: {
+        cost: 90000,
+        cpsMultiplier: 60,
+        engineDisplay: "V12",
+        display: "V12 (prend la moitié de la voiture)",
+      },
+      500: {
+        cost: 250000,
+        cpsMultiplier: 200,
+        engineDisplay: "RÉACTEUR",
+        display: "Réacteur/rotor expérimental",
+      },
+    },
   },
 };
 
 function createUpgradeError(code, message) {
-  const error = new Error(message || code);
+  const error = new Error(message);
   error.code = code;
   return error;
 }
 
-function getCategoryDefinition(categoryId) {
-  const definition = UPGRADE_CATALOG[categoryId];
-
-  if (!definition) {
-    throw createUpgradeError("INVALID_CATEGORY", `Unknown upgrade category: ${categoryId}`);
-  }
-
-  return definition;
-}
-
 function getTierDefinition(categoryId, tierId) {
-  const categoryDefinition = getCategoryDefinition(categoryId);
-  const tierDefinition = categoryDefinition.tiers.find((tier) => tier.tierId === tierId);
+  const category = UPGRADE_CATALOG[categoryId];
 
-  if (!tierDefinition) {
-    throw createUpgradeError("INVALID_TIER", `Unknown upgrade tier: ${categoryId}:${tierId}`);
+  if (!category) {
+    throw createUpgradeError(
+      "INVALID_CATEGORY",
+      `Unknown upgrade category: ${categoryId}`,
+    );
   }
 
-  return tierDefinition;
+  const tier = category.tiers[tierId];
+
+  if (!tier) {
+    throw createUpgradeError(
+      "INVALID_TIER",
+      `Unknown upgrade tier: ${categoryId}:${tierId}`,
+    );
+  }
+
+  return tier;
 }
 
 function getPurchaseCost(categoryId, tierId) {
-  const categoryDefinition = getCategoryDefinition(categoryId);
-  getTierDefinition(categoryId, tierId);
-
-  const tierIndex = categoryDefinition.tiers.findIndex((tier) => tier.tierId === tierId);
-  return Math.round(categoryDefinition.baseCost * (categoryDefinition.growthRate ** tierIndex));
+  return getTierDefinition(categoryId, tierId).cost;
 }
 
-function getBaseClickPower(state) {
-  if (typeof state.baseClickPower === "number") {
-    return state.baseClickPower;
+function hasUpgrade(upgrades, categoryId, tierId) {
+  return upgrades.some(
+    (upgrade) => upgrade.categoryId === categoryId && upgrade.tierId === tierId,
+  );
+}
+
+function applyUpgradeEffects(state, categoryId, tierDefinition) {
+  const nextState = {
+    ...state,
+    upgrades: [...(state.upgrades ?? [])],
+  };
+
+  if (typeof nextState.clickPower !== "number") {
+    nextState.clickPower = 1;
   }
 
-  if (typeof state.clickPower === "number") {
-    return state.clickPower;
+  if (typeof nextState.cps !== "number") {
+    nextState.cps = 0;
   }
 
-  return 1;
-}
-
-function getBaseCps(state) {
-  if (typeof state.baseCps === "number") {
-    return state.baseCps;
+  if (categoryId === "admission" || categoryId === "exhaust") {
+    nextState.clickPower *= tierDefinition.clickPowerMultiplier;
   }
 
-  if (typeof state.cps === "number") {
-    return state.cps;
+  if (categoryId === "fuel" || categoryId === "engine") {
+    nextState.cps *= tierDefinition.cpsMultiplier;
   }
 
-  return 0;
-}
-
-function getOwnedUpgradeMultiplier(upgrades, categoryId) {
-  return upgrades
-    .filter((upgrade) => upgrade.categoryId === categoryId)
-    .reduce((multiplier, upgrade) => multiplier * getTierDefinition(categoryId, upgrade.tierId).multiplier, 1);
-}
-
-function getEngineDisplay(upgrades) {
-  const ownedEngineUpgrades = upgrades.filter((upgrade) => upgrade.categoryId === "engine");
-
-  if (ownedEngineUpgrades.length === 0) {
-    return undefined;
+  if (categoryId === "engine") {
+    nextState.engineDisplay = tierDefinition.engineDisplay;
   }
 
-  const highestTier = ownedEngineUpgrades.reduce((highest, upgrade) => (upgrade.tierId > highest.tierId ? upgrade : highest));
-  return getTierDefinition("engine", highestTier.tierId).display;
-}
-
-function getClickPower(state) {
-  const upgrades = state.upgrades || [];
-  const baseClickPower = getBaseClickPower(state);
-  const admissionMultiplier = getOwnedUpgradeMultiplier(upgrades, "admission");
-  const exhaustMultiplier = getOwnedUpgradeMultiplier(upgrades, "exhaust");
-
-  return baseClickPower * admissionMultiplier * exhaustMultiplier;
-}
-
-function getPassiveCps(state) {
-  const upgrades = state.upgrades || [];
-  const baseCps = getBaseCps(state);
-  const fuelMultiplier = getOwnedUpgradeMultiplier(upgrades, "fuel");
-  const engineMultiplier = getOwnedUpgradeMultiplier(upgrades, "engine");
-
-  return baseCps * fuelMultiplier * engineMultiplier;
+  return nextState;
 }
 
 function buyUpgrade(state, categoryId, tierId) {
-  const categoryDefinition = getCategoryDefinition(categoryId);
-  getTierDefinition(categoryId, tierId);
-  const upgrades = state.upgrades || [];
-  const alreadyOwned = upgrades.some((upgrade) => upgrade.categoryId === categoryId && upgrade.tierId === tierId);
+  const tierDefinition = getTierDefinition(categoryId, tierId);
+  const upgrades = state.upgrades ?? [];
 
-  if (alreadyOwned) {
-    throw createUpgradeError("ALREADY_OWNED", `Upgrade already owned: ${categoryId}:${tierId}`);
+  if (hasUpgrade(upgrades, categoryId, tierId)) {
+    throw createUpgradeError(
+      "ALREADY_OWNED",
+      `Upgrade already owned: ${categoryId}:${tierId}`,
+    );
   }
 
-  const cost = getPurchaseCost(categoryId, tierId);
-
-  if ((state.horses || 0) < cost) {
-    throw createUpgradeError("INSUFFICIENT_FUNDS", `Need ${cost} horses to buy ${categoryId}:${tierId}`);
+  if ((state.horses ?? 0) < tierDefinition.cost) {
+    throw createUpgradeError(
+      "INSUFFICIENT_FUNDS",
+      `Not enough horses for ${categoryId}:${tierId}`,
+    );
   }
 
-  const nextUpgrades = [
-    ...upgrades,
-    {
-      categoryId,
-      tierId,
-      purchasedAt: new Date().toISOString(),
-    },
-  ];
+  const nextState = applyUpgradeEffects(state, categoryId, tierDefinition);
 
-  const baseClickPower = getBaseClickPower(state);
-  const baseCps = getBaseCps(state);
+  nextState.horses = (state.horses ?? 0) - tierDefinition.cost;
+  nextState.upgrades.push({
+    categoryId,
+    tierId,
+    purchasedAt: new Date().toISOString(),
+  });
 
-  return {
-    ...state,
-    horses: (state.horses || 0) - cost,
-    upgrades: nextUpgrades,
-    baseClickPower,
-    baseCps,
-    clickPower: getClickPower({ ...state, upgrades: nextUpgrades, baseClickPower }),
-    cps: getPassiveCps({ ...state, upgrades: nextUpgrades, baseCps }),
-    engineDisplay: categoryDefinition.effect === "cps" && categoryId === "engine" ? getEngineDisplay(nextUpgrades) : state.engineDisplay,
-  };
+  return nextState;
+}
+
+function getClickPower(state) {
+  return state.clickPower ?? 1;
+}
+
+function getPassiveCps(state) {
+  return state.cps ?? 0;
 }
 
 module.exports = {
-  UPGRADE_CATALOG,
   buyUpgrade,
   getClickPower,
   getPassiveCps,
   getPurchaseCost,
+  UPGRADE_CATALOG,
 };
