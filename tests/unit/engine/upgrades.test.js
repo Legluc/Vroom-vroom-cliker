@@ -1,9 +1,9 @@
-const {
+import {
   buyUpgrade,
   getClickPower,
   getPassiveCps,
   getPurchaseCost,
-} = require("../../../src/engine/upgrades");
+} from "../../../src/engine/upgrades.js";
 
 function createState(overrides = {}) {
   return {
@@ -128,5 +128,52 @@ describe("buyUpgrade", () => {
       ]),
     );
     expect(nextState.clickPower).toBe(50);
+  });
+
+  it("initialise clickPower à 1 si absent de l'état", () => {
+    const state = { horses: 10_000, upgrades: [] }; // pas de clickPower
+
+    const nextState = buyUpgrade(state, "admission", 1);
+
+    // clickPower doit être initialisé à 1 puis multiplié par 1.0
+    expect(nextState.clickPower).toBe(1);
+  });
+
+  it("initialise cps à 0 si absent de l'état", () => {
+    const state = { horses: 10_000, upgrades: [] }; // pas de cps
+
+    const nextState = buyUpgrade(state, "fuel", 1);
+
+    // cps doit être initialisé à 0 puis multiplié
+    expect(nextState.cps).toBe(0);
+  });
+
+  it("getClickPower retourne 1 si clickPower absent", () => {
+    expect(getClickPower({})).toBe(1);
+  });
+
+  it("getPassiveCps retourne 0 si cps absent", () => {
+    expect(getPassiveCps({})).toBe(0);
+  });
+
+  it("achète un upgrade engine et définit engineDisplay", () => {
+    const state = createState({ horses: 10_000, cps: 5 });
+
+    const nextState = buyUpgrade(state, "engine", 1);
+
+    expect(nextState.upgrades).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ categoryId: "engine", tierId: 1 }),
+      ]),
+    );
+    expect(nextState.engineDisplay).toBe("1-cyl");
+  });
+
+  it("buyUpgrade avec state sans upgrades utilise tableau vide", () => {
+    const state = { horses: 10_000, clickPower: 1, cps: 0 }; // pas de upgrades
+
+    const nextState = buyUpgrade(state, "admission", 1);
+
+    expect(nextState.upgrades.length).toBe(1);
   });
 });

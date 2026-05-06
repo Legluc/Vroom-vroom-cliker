@@ -268,4 +268,33 @@ describe("engine/autoclicker.js", () => {
 
     expect(totalCps).toBe(10); // sans multiplicateur
   });
+
+  // Premier tick sans lastTickAt — branche ligne 174
+  it("applyTick sans lastTickAt retourne l'état avec lastTickAt initialisé", () => {
+    const state = createDefaultState();
+    state.horses = 100;
+    state.lastTickAt = null;
+
+    const now = Date.now();
+    const newState = applyTick(state, now);
+
+    expect(newState.horses).toBe(100); // pas de gain au premier tick
+    expect(newState.lastTickAt).toBe(now);
+  });
+
+  // upgradeAutoclicker avec plusieurs autoclickers — couvre la branche return a
+  it("upgradeAutoclicker met à niveau seulement l'autoclicker ciblé", () => {
+    let state = createDefaultState();
+    state.horses = 10000;
+    state = buyAutoclicker(state, "basic");
+    state = buyAutoclicker(state, "turbo");
+    state.horses = 10000;
+
+    const newState = upgradeAutoclicker(state, "basic");
+
+    const basic = newState.autoclickers.find((a) => a.id === "basic");
+    const turbo = newState.autoclickers.find((a) => a.id === "turbo");
+    expect(basic.level).toBe(2);
+    expect(turbo.level).toBe(1); // inchangé
+  });
 });

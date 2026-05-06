@@ -1,11 +1,10 @@
-const Database = require("better-sqlite3");
-
-const { runMigrations } = require("../../../src/db/migrations");
-const {
+import Database from "better-sqlite3";
+import { runMigrations } from "../../../src/db/migrations.js";
+import {
   deleteGameState,
   loadGameState,
   saveGameState,
-} = require("../../../src/db/gameStateRepo");
+} from "../../../src/db/gameStateRepo.js";
 
 function createState(overrides = {}) {
   return {

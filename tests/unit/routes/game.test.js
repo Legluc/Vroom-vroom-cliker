@@ -449,4 +449,64 @@ describe("Routes Game", () => {
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("error");
   });
+
+  it("bonus — POST /game/tick sans body utilise Date.now()", async () => {
+    const result = db
+      .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+      .run(TEST_USER.username, "hash");
+    const userId = result.lastInsertRowid;
+    saveGameState(db, userId, {
+      ...createDefaultState(userId),
+      horses: 0,
+      autoclickers: [
+        {
+          id: "basic",
+          level: 1,
+          cps: 10,
+          active: true,
+          costBase: 1000,
+          costGrowthRate: 1.15,
+        },
+      ],
+      lastTickAt: Date.now() - 2000,
+    });
+
+    const agent = request.agent(app);
+    await agent.post("/__test__/session").send({ userId });
+
+    const response = await agent.post("/game/tick"); // sans body
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("horses");
+  });
+
+  it("bonus — POST /game/upgrade sans body retourne 400", async () => {
+    const result = db
+      .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+      .run(TEST_USER.username, "hash");
+    const userId = result.lastInsertRowid;
+    saveGameState(db, userId, createDefaultState(userId));
+
+    const agent = request.agent(app);
+    await agent.post("/__test__/session").send({ userId });
+
+    const response = await agent.post("/game/upgrade"); // sans body
+
+    expect(response.status).toBe(400);
+  });
+
+  it("bonus — POST /game/autoclicker/buy sans body retourne 400", async () => {
+    const result = db
+      .prepare("INSERT INTO users (username, password) VALUES (?, ?)")
+      .run(TEST_USER.username, "hash");
+    const userId = result.lastInsertRowid;
+    saveGameState(db, userId, createDefaultState(userId));
+
+    const agent = request.agent(app);
+    await agent.post("/__test__/session").send({ userId });
+
+    const response = await agent.post("/game/autoclicker/buy"); // sans body
+
+    expect(response.status).toBe(400);
+  });
 });

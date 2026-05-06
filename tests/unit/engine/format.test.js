@@ -1,4 +1,4 @@
-const { formatHorses } = require("../../../src/engine/format");
+import { formatHorses } from "../../../src/engine/format.js";
 
 describe("formatHorses", () => {
   it("affiche un entier sous 1000 tel quel", () => {
