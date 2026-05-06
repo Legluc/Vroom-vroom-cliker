@@ -1,13 +1,19 @@
 /**
- * Middleware pour vérifier que l'utilisateur est authentifié
- * Redirige vers /auth/login si pas de session valide
+ * Middleware pour vérifier que l'utilisateur est authentifié.
+ * Retourne 401 JSON pour les requêtes API (Accept: application/json ou chemin /game/...).
+ * Redirige vers /auth/login pour les requêtes navigateur.
  */
 export function requireAuth(req, res, next) {
   if (req.session && req.session.userId) {
-    next();
-  } else {
-    res.redirect("/auth/login");
+    return next();
   }
+  const isApi =
+    req.originalUrl.startsWith("/game") ||
+    (req.headers.accept && req.headers.accept.includes("application/json"));
+  if (isApi) {
+    return res.status(401).json({ error: "UNAUTHORIZED" });
+  }
+  res.redirect("/auth/login");
 }
 
 /**
