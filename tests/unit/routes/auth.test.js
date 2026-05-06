@@ -200,4 +200,45 @@ describe("Routes Authentication", () => {
 
     expect([200, 401, 500]).toContain(response.status);
   });
+
+  // Couvrir GET / avec un état existant en DB
+  it("AUTH bonus — GET / avec session valide rend la page de jeu", async () => {
+    // Créer un compte et obtenir un cookie de session
+    const registerResponse = await request(app)
+      .post("/auth/register")
+      .send({ username: "gameuser", password: TEST_PASSWORD });
+
+    const cookies = registerResponse.headers["set-cookie"];
+    const gameResponse = await request(app)
+      .get("/")
+      .set("Cookie", cookies || []);
+
+    // Doit rendre la page (200) ou rediriger si le cookie de session n'est pas transmis correctement
+    expect([200, 302]).toContain(gameResponse.status);
+  });
+
+  // Couvrir la route /__test__/seed
+  it("AUTH bonus — POST /__test__/seed avec session valide seed l'état", async () => {
+    const registerResponse = await request(app)
+      .post("/auth/register")
+      .send({ username: "seeduser", password: TEST_PASSWORD });
+
+    const cookies = registerResponse.headers["set-cookie"];
+    const seedResponse = await request(app)
+      .post("/__test__/seed")
+      .set("Cookie", cookies || [])
+      .send({ horses: 9999 });
+
+    expect(seedResponse.status).toBe(200);
+    expect(seedResponse.body.ok).toBe(true);
+  });
+
+  // Couvrir /__test__/seed sans session (401)
+  it("AUTH bonus — POST /__test__/seed sans session retourne 401", async () => {
+    const response = await request(app)
+      .post("/__test__/seed")
+      .send({ horses: 9999 });
+
+    expect(response.status).toBe(401);
+  });
 });

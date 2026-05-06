@@ -286,4 +286,25 @@ describe("engine/events.js", () => {
     expect(newState.activeEvent.type).toBe("AUTO_CLICK_FRENZY");
     expect(newState.activeEvent.multiplier).toBe(2);
   });
+
+  // Test: clearExpiredEvent sans activeEvent retourne l'état inchangé
+  it("clearExpiredEvent sans activeEvent retourne l'état sans modification", () => {
+    const state = createDefaultState();
+    state.activeEvent = null;
+    const now = Date.now();
+
+    const newState = clearExpiredEvent(state, now);
+
+    expect(newState).toBe(state); // même référence
+  });
+
+  // Test: tryTriggerEvent avec type inconnu lève une erreur
+  it("tryTriggerEvent avec type inconnu lève UNKNOWN_EVENT", () => {
+    const state = createDefaultState();
+    const now = Date.now();
+
+    expect(() => tryTriggerEvent(state, "INEXISTANT", now)).toThrow(
+      "UNKNOWN_EVENT: INEXISTANT",
+    );
+  });
 });

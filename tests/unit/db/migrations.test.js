@@ -1,6 +1,5 @@
-const Database = require("better-sqlite3");
-
-const { runMigrations } = require("../../../src/db/migrations");
+import Database from "better-sqlite3";
+import { runMigrations } from "../../../src/db/migrations.js";
 
 describe("runMigrations", () => {
   let db;
