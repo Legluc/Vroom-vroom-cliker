@@ -21,12 +21,20 @@ describe("formatHorses", () => {
     expect(formatHorses(750_000_000)).toBe("750M");
   });
 
-  it("affiche 1000000000 en 1MM", () => {
-    expect(formatHorses(1_000_000_000)).toBe("1MM");
+  it("affiche 1000000000 en 1B", () => {
+    expect(formatHorses(1_000_000_000)).toBe("1B");
   });
 
-  it("affiche 5200000000 en 5MM", () => {
-    expect(formatHorses(5_200_000_000)).toBe("5MM");
+  it("affiche 5200000000 en 5B", () => {
+    expect(formatHorses(5_200_000_000)).toBe("5B");
+  });
+
+  it("affiche 1200000000000 en 1T", () => {
+    expect(formatHorses(1_200_000_000_000)).toBe("1T");
+  });
+
+  it("affiche 4500000000000000 en 4P", () => {
+    expect(formatHorses(4_500_000_000_000_000)).toBe("4P");
   });
 
   it("gère 0", () => {
