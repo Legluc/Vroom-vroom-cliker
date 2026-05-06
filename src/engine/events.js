@@ -59,7 +59,7 @@ const EVENTS_CONFIG = {
  * @returns {boolean} true si un événement est actif et non expiré
  */
 export function isEventActive(state, now) {
-  if (!state.activeEvent) return false;
+  if (!state.activeEvent) {return false;}
   return state.activeEvent.expiresAt > now;
 }
 
