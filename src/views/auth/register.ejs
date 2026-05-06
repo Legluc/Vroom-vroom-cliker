@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vroom Vroom Clicker — Inscription</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: sans-serif; background: #1a1a2e; color: #eee; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+      .card { background: #16213e; padding: 2rem; border-radius: 8px; width: 100%; max-width: 380px; box-shadow: 0 4px 24px rgba(0,0,0,.4); }
+      h1 { text-align: center; margin-bottom: 1.5rem; font-size: 1.5rem; color: #e94560; }
+      .form-group { margin-bottom: 1rem; }
+      label { display: block; margin-bottom: .4rem; font-size: .9rem; color: #aaa; }
+      input { width: 100%; padding: .6rem .9rem; border-radius: 5px; border: 1px solid #333; background: #0f3460; color: #eee; font-size: 1rem; }
+      button { width: 100%; padding: .75rem; background: #e94560; color: #fff; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; margin-top: .5rem; }
+      button:hover { background: #c73652; }
+      .error { background: #c73652; color: #fff; padding: .6rem 1rem; border-radius: 5px; margin-bottom: 1rem; font-size: .9rem; }
+      .link { text-align: center; margin-top: 1rem; font-size: .9rem; }
+      .link a { color: #e94560; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>🏎️ Vroom Vroom</h1>
+      <% if (error) { %>
+        <div class="error" data-testid="auth-error"><%= error %></div>
+      <% } %>
+      <form method="POST" action="/auth/register">
+        <div class="form-group">
+          <label for="username">Pseudo</label>
+          <input type="text" id="username" name="username" data-testid="register-username" required autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" name="password" data-testid="register-password" required autocomplete="new-password" />
+        </div>
+        <button type="submit" data-testid="register-submit">Créer mon compte</button>
+      </form>
+      <div class="link">
+        Déjà un compte ? <a href="/auth/login">Se connecter</a>
+      </div>
+    </div>
+  </body>
+</html>

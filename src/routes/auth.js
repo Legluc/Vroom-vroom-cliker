@@ -8,7 +8,7 @@ export function createAuthRouter(db) {
    * GET /auth/register — Affiche le formulaire d'inscription
    */
   router.get("/register", (req, res) => {
-    res.render("auth/register");
+    res.render("auth/register", { error: null });
   });
 
   /**
@@ -21,7 +21,9 @@ export function createAuthRouter(db) {
 
       // Valider les champs
       if (!username || !password) {
-        return res.status(400).json({ error: "MISSING_FIELDS" });
+        return res.render("auth/register", {
+          error: "Pseudo et mot de passe requis.",
+        });
       }
 
       // Vérifier si le pseudo existe déjà
@@ -30,7 +32,9 @@ export function createAuthRouter(db) {
         .get(username);
 
       if (existingUser) {
-        return res.status(409).json({ error: "USERNAME_TAKEN" });
+        return res.render("auth/register", {
+          error: "Ce pseudo est déjà pris.",
+        });
       }
 
       // Hasher le mot de passe
@@ -44,10 +48,10 @@ export function createAuthRouter(db) {
       // Créer la session
       req.session.userId = result.lastInsertRowid;
 
-      res.status(201).json({ userId: result.lastInsertRowid });
+      res.redirect("/");
     } catch (error) {
       console.error("Error in register:", error);
-      res.status(500).json({ error: "INTERNAL_ERROR" });
+      res.render("auth/register", { error: "Erreur interne, réessayez." });
     }
   });
 
@@ -55,7 +59,7 @@ export function createAuthRouter(db) {
    * GET /auth/login — Affiche le formulaire de connexion
    */
   router.get("/login", (req, res) => {
-    res.render("auth/login");
+    res.render("auth/login", { error: null });
   });
 
   /**
@@ -72,23 +76,23 @@ export function createAuthRouter(db) {
         .get(username);
 
       if (!user) {
-        return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+        return res.render("auth/login", { error: "Identifiants invalides." });
       }
 
       // Vérifier le mot de passe
       const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (!isPasswordValid) {
-        return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+        return res.render("auth/login", { error: "Identifiants invalides." });
       }
 
       // Créer la session
       req.session.userId = user.id;
 
-      res.json({ userId: user.id });
+      res.redirect("/");
     } catch (error) {
       console.error("Error in login:", error);
-      res.status(500).json({ error: "INTERNAL_ERROR" });
+      res.render("auth/login", { error: "Erreur interne, réessayez." });
     }
   });
 

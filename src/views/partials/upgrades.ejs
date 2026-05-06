@@ -1,0 +1,45 @@
+<%
+  // catalog est passé par la route :
+  // { admission: { tiers: { 1: {...}, 25: {...} } }, ... }
+  const categoryLabels = {
+    admission: '🌬️ Admission',
+    fuel: '⛽ Carburant',
+    exhaust: '💨 Échappement',
+    engine: '🔧 Bloc moteur',
+  };
+  const ownedSet = new Set((state.upgrades || []).map(u => u.categoryId + '-' + u.tierId));
+%>
+<div class="upgrades-panel" id="upgrades-panel">
+  <h2>Upgrades</h2>
+  <% for (const [catId, catDef] of Object.entries(catalog)) { %>
+    <div class="upgrade-category">
+      <h3><%= categoryLabels[catId] || catId %></h3>
+      <div class="upgrade-list">
+        <% for (const [tierId, tierDef] of Object.entries(catDef.tiers)) { %>
+          <%
+            const key = catId + '-' + tierId;
+            const owned = ownedSet.has(key);
+            const canAfford = state.horses >= tierDef.cost;
+          %>
+          <div class="upgrade-item <%= owned ? 'owned' : '' %>" data-testid="upgrade-item-<%= catId %>-<%= tierId %>">
+            <% if (owned) { %>
+              <span class="upgrade-owned-mark" data-testid="upgrade-owned-<%= catId %>-<%= tierId %>">✅</span>
+            <% } %>
+            <span class="upgrade-name"><%= tierDef.display %></span>
+            <span class="upgrade-cost"><%= tierDef.cost %> 🐴</span>
+            <button
+              class="upgrade-btn"
+              data-testid="upgrade-btn-<%= catId %>-<%= tierId %>"
+              data-category="<%= catId %>"
+              data-tier="<%= tierId %>"
+              onclick="buyUpgrade('<%= catId %>', <%= tierId %>)"
+              <%= (owned || !canAfford) ? 'disabled' : '' %>
+            >
+              <%= owned ? 'Possédé' : 'Acheter' %>
+            </button>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>

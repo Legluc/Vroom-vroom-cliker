@@ -1,0 +1,28 @@
+<div class="events-container" id="events-container">
+<% if (state.activeEvent) {
+  const ev = state.activeEvent;
+  const isInteractive = ev.requiresAction;
+  let evLabel = ev.type.replace(/_/g, ' ');
+  if (ev.type === 'GOLDEN_TURBO') evLabel = 'GOLDEN TURBO';
+  if (ev.type === 'AUTO_CLICK_FRENZY') evLabel = 'AUTO-CLIC FRÉNÉSIE';
+  if (ev.type === 'FUEL_SURGE') evLabel = 'TURBO CARBURANT';
+  if (ev.type === 'ENGINE_FAILURE') evLabel = 'PANNE MOTEUR';
+  if (ev.type === 'AUTOCLICKER_PAUSE') evLabel = 'AUTOCLICKERS EN PAUSE';
+  if (ev.type === 'RADAR_ALERT') evLabel = 'ALERTE RADAR';
+  if (ev.type === 'POLICE_CONTROL') evLabel = 'Contrôle de police';
+  const isBonus = ['GOLDEN_TURBO', 'AUTO_CLICK_FRENZY', 'FUEL_SURGE'].includes(ev.type);
+%>
+  <div class="event-banner <%= isBonus ? 'event-bonus' : 'event-malus' %>" data-testid="event-banner" data-expires-at="<%= ev.expiresAt %>">
+    <span class="event-icon"><%= isBonus ? '⚡' : '🚨' %></span>
+    <span class="event-label"><%= evLabel %></span>
+    <span class="event-countdown" data-testid="event-countdown" id="event-countdown"></span>
+    <% if (isInteractive) { %>
+      <% let btnLabel = 'Résoudre';
+         if (ev.type === 'RADAR_ALERT') btnLabel = 'Freiner';
+         if (ev.type === 'POLICE_CONTROL') btnLabel = 'Montrer les papiers';
+      %>
+      <button class="event-resolve-btn" data-testid="event-resolve-btn" onclick="resolveEvent()"><%= btnLabel %></button>
+    <% } %>
+  </div>
+<% } %>
+</div>
