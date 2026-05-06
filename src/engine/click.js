@@ -9,7 +9,7 @@
  * @returns {boolean} true si l'événement est expiré
  */
 function isEventExpired(event) {
-  if (!event) return false;
+  if (!event) {return false;}
   return event.expiresAt < Date.now();
 }
 
