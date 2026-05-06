@@ -32,6 +32,4 @@ function formatHorses(value) {
   return `${sign}${Math.trunc(absoluteValue / 1_000_000_000_000_000)}P`;
 }
 
-module.exports = {
-  formatHorses,
-};
+export { formatHorses };

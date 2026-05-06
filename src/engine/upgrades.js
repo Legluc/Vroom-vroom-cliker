@@ -220,7 +220,7 @@ function getPassiveCps(state) {
   return state.cps ?? 0;
 }
 
-module.exports = {
+export {
   buyUpgrade,
   getClickPower,
   getPassiveCps,
