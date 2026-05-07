@@ -16,11 +16,17 @@ const DEFAULT_STATE = {
   // Clic
   clickPower: 1, // chevaux gagnés par clic manuel
 
+  // Bâtiments
+  buildings: {}, // { stagiaire, pompe, garage, ... }
+
+  // Améliorations one-off débloquées
+  unlockedUpgrades: [], // ['cle_a_chocs', 'formation_acceleree']
+
   // Autoclickers
   autoclickers: [], // [{ id, level, cps, active }]
 
-  // Upgrades possédées
-  upgrades: [], // [{ categoryId, tierId, purchasedAt }]
+  // Cache calculé pour les gains passifs des bâtiments
+  currentPassiveCps: 0,
 
   // Événement actif (null si aucun)
   activeEvent: null, // { type, multiplier, expiresAt, requiresAction }

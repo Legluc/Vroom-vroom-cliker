@@ -1,215 +1,314 @@
-const UPGRADE_CATALOG = {
-  admission: {
-    tiers: {
-      1: {
-        cost: 500,
-        clickPowerMultiplier: 1,
-        display: "Filtre en papier usé",
-      },
-      25: { cost: 2500, clickPowerMultiplier: 1.5, display: "Conduit sport" },
-      50: {
-        cost: 5000,
-        clickPowerMultiplier: 2.5,
-        display: "Entrée d'air sur le capot",
-      },
-      100: {
-        cost: 12500,
-        clickPowerMultiplier: 5,
-        display: "Aspirateur industriel (bricolé)",
-      },
-      250: {
-        cost: 35000,
-        clickPowerMultiplier: 15,
-        display: "Turbine (type avion)",
-      },
-      500: {
-        cost: 100000,
-        clickPowerMultiplier: 50,
-        display: "Aspirateur de matière noire",
-      },
-    },
+const BUILDINGS_CATALOG = {
+  stagiaire: {
+    id: "stagiaire",
+    name: "Stagiaire Mécano",
+    baseCost: 15,
+    baseCps: 0.1,
+    description: "Un apprenti qui serre quelques boulons par seconde.",
   },
-  fuel: {
-    tiers: {
-      1: { cost: 750, cpsMultiplier: 1, display: "Sans Plomb 95 (dilué)" },
-      25: { cost: 3500, cpsMultiplier: 1.5, display: "Sans Plomb 98" },
-      50: { cost: 7500, cpsMultiplier: 3, display: "Méthanol 85" },
-      100: { cost: 20000, cpsMultiplier: 8, display: "Carburant de fusée" },
-      250: { cost: 60000, cpsMultiplier: 25, display: "Plutonium enrichi" },
-      500: {
-        cost: 160000,
-        cpsMultiplier: 100,
-        display: "Jus de dinosaure concentré ×200",
-      },
-    },
+  pompe: {
+    id: "pompe",
+    name: "Pompe à Essence",
+    baseCost: 100,
+    baseCps: 1,
+    description: "Un débit constant de carburant et de revenus.",
   },
-  exhaust: {
-    tiers: {
-      1: { cost: 600, clickPowerMultiplier: 1, display: "Pot percé (Twingo)" },
-      25: {
-        cost: 3000,
-        clickPowerMultiplier: 2,
-        display: 'Ligne complète inox "Full Tube"',
-      },
-      50: {
-        cost: 6500,
-        clickPowerMultiplier: 4,
-        display: "Lance-flammes intégré",
-      },
-      100: {
-        cost: 8000,
-        clickPowerMultiplier: 10,
-        display: "Orgue / cracheur de feu",
-      },
-      250: {
-        cost: 42000,
-        clickPowerMultiplier: 30,
-        display: "Trompette surpuissante",
-      },
-      500: {
-        cost: 120000,
-        clickPowerMultiplier: 100,
-        display: "Propulseur de navette spatiale",
-      },
-    },
+  garage: {
+    id: "garage",
+    name: "Petit Garage",
+    baseCost: 1100,
+    baseCps: 8,
+    description: "Un atelier qui tourne en continu.",
   },
-  engine: {
-    tiers: {
-      1: {
-        cost: 1000,
-        cpsMultiplier: 1,
-        engineDisplay: "1-cyl",
-        display: "Moteur de tondeuse (monocylindre)",
-      },
-      25: {
-        cost: 5000,
-        cpsMultiplier: 3,
-        engineDisplay: "4-cyl",
-        display: "4 cylindres en ligne",
-      },
-      50: {
-        cost: 9000,
-        cpsMultiplier: 7,
-        engineDisplay: "V8",
-        display: "Moteur V8 américain",
-      },
-      100: {
-        cost: 30000,
-        cpsMultiplier: 20,
-        engineDisplay: "V10",
-        display: "V10 (Bugatti)",
-      },
-      250: {
-        cost: 90000,
-        cpsMultiplier: 60,
-        engineDisplay: "V12",
-        display: "V12 (prend la moitié de la voiture)",
-      },
-      500: {
-        cost: 250000,
-        cpsMultiplier: 200,
-        engineDisplay: "RÉACTEUR",
-        display: "Réacteur/rotor expérimental",
-      },
-    },
+  concessionnaire: {
+    id: "concessionnaire",
+    name: "Concessionnaire",
+    baseCost: 12000,
+    baseCps: 47,
+    description: "Des ventes à la chaîne et des marges confortables.",
+  },
+  usine: {
+    id: "usine",
+    name: "Usine d'Assemblage",
+    baseCost: 130000,
+    baseCps: 260,
+    description: "La production industrielle à plein régime.",
+  },
+  f1: {
+    id: "f1",
+    name: "Écurie de F1",
+    baseCost: 1400000,
+    baseCps: 1400,
+    description: "Des bolides de pointe pour une extraction massive.",
   },
 };
 
-function createUpgradeError(code, message) {
+const UPGRADES_CATALOG = {
+  cle_a_chocs: {
+    id: "cle_a_chocs",
+    name: "Clé à chocs",
+    cost: 500,
+    description: "Les clics manuels produisent deux fois plus.",
+    effect: { type: "click", multiplier: 2 },
+    requirements: [],
+  },
+  formation_acceleree: {
+    id: "formation_acceleree",
+    name: "Formation Accélérée",
+    cost: 1200,
+    description: "Les Stagiaires sont deux fois plus efficaces.",
+    effect: { type: "building", buildingId: "stagiaire", multiplier: 2 },
+    requirements: [{ buildingId: "stagiaire", amount: 10 }],
+  },
+  carburant_premium: {
+    id: "carburant_premium",
+    name: "Carburant Premium",
+    cost: 9000,
+    description: "Les Pompes à Essence doublent leur rendement.",
+    effect: { type: "building", buildingId: "pompe", multiplier: 2 },
+    requirements: [{ buildingId: "pompe", amount: 10 }],
+  },
+  atelier_optimise: {
+    id: "atelier_optimise",
+    name: "Atelier Optimisé",
+    cost: 25000,
+    description: "Tous les bâtiments produisent 25 % de plus.",
+    effect: { type: "allBuildings", multiplier: 1.25 },
+    requirements: [{ buildingId: "garage", amount: 5 }],
+  },
+  chaine_industrielle: {
+    id: "chaine_industrielle",
+    name: "Chaîne Industrielle",
+    cost: 180000,
+    description: "Les usines tournent deux fois plus vite.",
+    effect: { type: "building", buildingId: "usine", multiplier: 2 },
+    requirements: [{ buildingId: "usine", amount: 1 }],
+  },
+  pole_position: {
+    id: "pole_position",
+    name: "Pole Position",
+    cost: 750000,
+    description: "Le clic manuel devient un levier stratégique.",
+    effect: { type: "click", multiplier: 5 },
+    requirements: [{ buildingId: "f1", amount: 1 }],
+  },
+};
+
+function createPurchaseError(code, message) {
   const error = new Error(message);
   error.code = code;
   return error;
 }
 
-function getTierDefinition(categoryId, tierId) {
-  const category = UPGRADE_CATALOG[categoryId];
+function getBuildingDefinition(buildingId) {
+  const building = BUILDINGS_CATALOG[buildingId];
 
-  if (!category) {
-    throw createUpgradeError(
-      "INVALID_CATEGORY",
-      `Unknown upgrade category: ${categoryId}`,
+  if (!building) {
+    throw createPurchaseError(
+      "INVALID_BUILDING",
+      `Unknown building: ${buildingId}`,
     );
   }
 
-  const tier = category.tiers[tierId];
+  return building;
+}
 
-  if (!tier) {
-    throw createUpgradeError(
-      "INVALID_TIER",
-      `Unknown upgrade tier: ${categoryId}:${tierId}`,
+function getUpgradeDefinition(upgradeId) {
+  const upgrade = UPGRADES_CATALOG[upgradeId];
+
+  if (!upgrade) {
+    throw createPurchaseError(
+      "INVALID_UPGRADE",
+      `Unknown upgrade: ${upgradeId}`,
     );
   }
 
-  return tier;
+  return upgrade;
 }
 
-function getPurchaseCost(categoryId, tierId) {
-  return getTierDefinition(categoryId, tierId).cost;
-}
-
-function hasUpgrade(upgrades, categoryId, tierId) {
-  return upgrades.some(
-    (upgrade) => upgrade.categoryId === categoryId && upgrade.tierId === tierId,
+function normalizeBuildings(buildings = {}) {
+  return Object.fromEntries(
+    Object.keys(BUILDINGS_CATALOG).map((buildingId) => [
+      buildingId,
+      Math.max(0, Number(buildings[buildingId] ?? 0)),
+    ]),
   );
 }
 
-function applyUpgradeEffects(state, categoryId, tierDefinition) {
-  const nextState = {
-    ...state,
-    upgrades: [...(state.upgrades ?? [])],
-  };
-
-  if (typeof nextState.clickPower !== "number") {
-    nextState.clickPower = 1;
-  }
-
-  if (typeof nextState.cps !== "number") {
-    nextState.cps = 0;
-  }
-
-  if (categoryId === "admission" || categoryId === "exhaust") {
-    nextState.clickPower *= tierDefinition.clickPowerMultiplier;
-  }
-
-  if (categoryId === "fuel" || categoryId === "engine") {
-    nextState.cps *= tierDefinition.cpsMultiplier;
-  }
-
-  if (categoryId === "engine") {
-    nextState.engineDisplay = tierDefinition.engineDisplay;
-  }
-
-  return nextState;
+function normalizeUnlockedUpgrades(unlockedUpgrades = []) {
+  return Array.from(new Set(unlockedUpgrades.filter(Boolean).map(String)));
 }
 
-function buyUpgrade(state, categoryId, tierId) {
-  const tierDefinition = getTierDefinition(categoryId, tierId);
-  const upgrades = state.upgrades ?? [];
+function getBuildingCount(state, buildingId) {
+  return Number(state.buildings?.[buildingId] ?? 0);
+}
 
-  if (hasUpgrade(upgrades, categoryId, tierId)) {
-    throw createUpgradeError(
-      "ALREADY_OWNED",
-      `Upgrade already owned: ${categoryId}:${tierId}`,
-    );
-  }
-
-  if ((state.horses ?? 0) < tierDefinition.cost) {
-    throw createUpgradeError(
-      "INSUFFICIENT_FUNDS",
-      `Not enough horses for ${categoryId}:${tierId}`,
-    );
-  }
-
-  const nextState = applyUpgradeEffects(state, categoryId, tierDefinition);
-
-  nextState.horses = (state.horses ?? 0) - tierDefinition.cost;
-  nextState.upgrades.push({
-    categoryId,
-    tierId,
-    purchasedAt: new Date().toISOString(),
+function meetsUpgradeRequirements(state, upgradeDefinition) {
+  return (upgradeDefinition.requirements ?? []).every((requirement) => {
+    const count = getBuildingCount(state, requirement.buildingId);
+    return count >= requirement.amount;
   });
+}
 
-  return nextState;
+function getClickMultiplier(state) {
+  return normalizeUnlockedUpgrades(state.unlockedUpgrades).reduce(
+    (multiplier, upgradeId) => {
+      const upgrade = UPGRADES_CATALOG[upgradeId];
+
+      if (upgrade?.effect?.type === "click") {
+        return multiplier * upgrade.effect.multiplier;
+      }
+
+      return multiplier;
+    },
+    1,
+  );
+}
+
+function getBuildingMultiplier(state, buildingId) {
+  return normalizeUnlockedUpgrades(state.unlockedUpgrades).reduce(
+    (multiplier, upgradeId) => {
+      const upgrade = UPGRADES_CATALOG[upgradeId];
+      const effect = upgrade?.effect;
+
+      if (effect?.type === "allBuildings") {
+        return multiplier * effect.multiplier;
+      }
+
+      if (effect?.type === "building" && effect.buildingId === buildingId) {
+        return multiplier * effect.multiplier;
+      }
+
+      return multiplier;
+    },
+    1,
+  );
+}
+
+function calculateBuildingCps(buildingId, state) {
+  const building = getBuildingDefinition(buildingId);
+  const count = getBuildingCount(state, buildingId);
+
+  if (count <= 0) {
+    return 0;
+  }
+
+  return count * building.baseCps * getBuildingMultiplier(state, buildingId);
+}
+
+function calculateClickPower(state) {
+  return 1 * getClickMultiplier(state);
+}
+
+function calculatePassiveCps(state) {
+  return Object.keys(BUILDINGS_CATALOG).reduce(
+    (total, buildingId) => total + calculateBuildingCps(buildingId, state),
+    0,
+  );
+}
+
+function recalculateCachedStats(state) {
+  const normalizedState = {
+    ...state,
+    buildings: normalizeBuildings(state.buildings),
+    unlockedUpgrades: normalizeUnlockedUpgrades(state.unlockedUpgrades),
+  };
+
+  return {
+    ...normalizedState,
+    clickPower: calculateClickPower(normalizedState),
+    currentPassiveCps: calculatePassiveCps(normalizedState),
+  };
+}
+
+function getBuildingCost(buildingId, state) {
+  const building = getBuildingDefinition(buildingId);
+  const owned = getBuildingCount(state, buildingId);
+  return Math.ceil(building.baseCost * Math.pow(1.15, owned));
+}
+
+function getUpgradeCost(upgradeId) {
+  return getUpgradeDefinition(upgradeId).cost;
+}
+
+function getPurchaseCost(type, id, state = {}) {
+  if (type === "building") {
+    return getBuildingCost(id, state);
+  }
+
+  if (type === "upgrade") {
+    return getUpgradeCost(id);
+  }
+
+  throw createPurchaseError(
+    "INVALID_PURCHASE_TYPE",
+    `Unknown purchase type: ${type}`,
+  );
+}
+
+function buyBuilding(state, buildingId) {
+  const building = getBuildingDefinition(buildingId);
+  const cost = getBuildingCost(buildingId, state);
+
+  if ((state.horses ?? 0) < cost) {
+    throw createPurchaseError(
+      "INSUFFICIENT_FUNDS",
+      `Not enough horses for building: ${buildingId}`,
+    );
+  }
+
+  return recalculateCachedStats({
+    ...state,
+    horses: (state.horses ?? 0) - cost,
+    buildings: {
+      ...normalizeBuildings(state.buildings),
+      [building.id]: getBuildingCount(state, buildingId) + 1,
+    },
+  });
+}
+
+function buyUpgrade(state, upgradeId) {
+  const upgrade = getUpgradeDefinition(upgradeId);
+  const ownedUpgrades = normalizeUnlockedUpgrades(state.unlockedUpgrades);
+
+  if (ownedUpgrades.includes(upgradeId)) {
+    throw createPurchaseError(
+      "ALREADY_OWNED",
+      `Upgrade already owned: ${upgradeId}`,
+    );
+  }
+
+  if (!meetsUpgradeRequirements(state, upgrade)) {
+    throw createPurchaseError("UPGRADE_LOCKED", `Upgrade locked: ${upgradeId}`);
+  }
+
+  if ((state.horses ?? 0) < upgrade.cost) {
+    throw createPurchaseError(
+      "INSUFFICIENT_FUNDS",
+      `Not enough horses for upgrade: ${upgradeId}`,
+    );
+  }
+
+  return recalculateCachedStats({
+    ...state,
+    horses: (state.horses ?? 0) - upgrade.cost,
+    unlockedUpgrades: [...ownedUpgrades, upgradeId],
+  });
+}
+
+function buyPurchase(state, type, id) {
+  if (type === "building") {
+    return buyBuilding(state, id);
+  }
+
+  if (type === "upgrade") {
+    return buyUpgrade(state, id);
+  }
+
+  throw createPurchaseError(
+    "INVALID_PURCHASE_TYPE",
+    `Unknown purchase type: ${type}`,
+  );
 }
 
 function getClickPower(state) {
@@ -217,13 +316,33 @@ function getClickPower(state) {
 }
 
 function getPassiveCps(state) {
-  return state.cps ?? 0;
+  return state.currentPassiveCps ?? 0;
+}
+
+function getAvailableUpgrades(state) {
+  const ownedUpgrades = normalizeUnlockedUpgrades(state.unlockedUpgrades);
+
+  return Object.values(UPGRADES_CATALOG).filter((upgrade) => {
+    if (ownedUpgrades.includes(upgrade.id)) {
+      return false;
+    }
+
+    return meetsUpgradeRequirements(state, upgrade);
+  });
 }
 
 export {
+  BUILDINGS_CATALOG,
+  UPGRADES_CATALOG,
+  buyBuilding,
+  buyPurchase,
   buyUpgrade,
+  calculateBuildingCps,
+  getAvailableUpgrades,
+  getBuildingCost,
   getClickPower,
   getPassiveCps,
   getPurchaseCost,
-  UPGRADE_CATALOG,
+  getUpgradeCost,
+  recalculateCachedStats,
 };
