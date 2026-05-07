@@ -11,6 +11,6 @@ app.get("/", (req, res) => {
   res.render("index", { title: "Vroom Vroom Cliker" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
