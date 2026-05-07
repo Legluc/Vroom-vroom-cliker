@@ -1,179 +1,146 @@
+import { describe, it, expect } from "vitest";
 import {
+  BUILDINGS_CATALOG,
+  UPGRADES_CATALOG,
+  buyBuilding,
+  buyPurchase,
   buyUpgrade,
+  calculateBuildingCps,
+  getAvailableUpgrades,
+  getBuildingCost,
   getClickPower,
   getPassiveCps,
-  getPurchaseCost,
+  recalculateCachedStats,
 } from "../../../src/engine/upgrades.js";
 
 function createState(overrides = {}) {
   return {
     horses: 0,
     clickPower: 1,
-    cps: 0,
-    upgrades: [],
-    engineDisplay: null,
+    buildings: {},
+    unlockedUpgrades: [],
+    currentPassiveCps: 0,
     ...overrides,
   };
 }
 
-describe("buyUpgrade", () => {
-  it("achète un upgrade valide et déduit son coût", () => {
-    const state = createState({ horses: 10_000 });
+describe("engine/upgrades.js", () => {
+  it("calcule le coût exponentiel d'un bâtiment", () => {
+    const state = createState({ buildings: { stagiaire: 1 } });
 
-    const nextState = buyUpgrade(state, "admission", 1);
-
-    expect(nextState.horses).toBe(9_500);
-    expect(nextState.upgrades).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ categoryId: "admission", tierId: 1 }),
-      ]),
-    );
-    expect(state.horses).toBe(10_000);
+    expect(getBuildingCost("stagiaire", state)).toBe(18);
   });
 
-  it("lève INSUFFICIENT_FUNDS si les chevaux manquent", () => {
-    const state = createState({ horses: 100 });
+  it("achète un bâtiment et met à jour le cache passif", () => {
+    const state = createState({ horses: 100, buildings: {} });
 
-    expect(() => buyUpgrade(state, "admission", 1)).toThrowError(
-      expect.objectContaining({ code: "INSUFFICIENT_FUNDS" }),
-    );
-    expect(state.horses).toBe(100);
-  });
+    const nextState = buyBuilding(state, "stagiaire");
 
-  it("lève ALREADY_OWNED si le palier est déjà acheté", () => {
-    const state = createState({
-      horses: 10_000,
-      upgrades: [{ categoryId: "admission", tierId: 1 }],
-    });
-
-    expect(() => buyUpgrade(state, "admission", 1)).toThrowError(
-      expect.objectContaining({ code: "ALREADY_OWNED" }),
-    );
-    expect(state.horses).toBe(10_000);
-  });
-
-  it("lève INVALID_TIER pour un palier inconnu", () => {
-    const state = createState({ horses: 10_000 });
-
-    expect(() => buyUpgrade(state, "admission", 999)).toThrowError(
-      expect.objectContaining({ code: "INVALID_TIER" }),
-    );
-  });
-
-  it("lève INVALID_CATEGORY pour une catégorie inconnue", () => {
-    const state = createState({ horses: 10_000 });
-
-    expect(() => buyUpgrade(state, "turbo", 1)).toThrowError(
-      expect.objectContaining({ code: "INVALID_CATEGORY" }),
-    );
-  });
-
-  it("applique le multiplicateur clickPower pour Admission", () => {
-    const state = createState({ horses: 10_000 });
-
-    const nextState = buyUpgrade(state, "admission", 25);
-
-    expect(nextState.clickPower).toBe(1.5);
-  });
-
-  it("applique le multiplicateur cps pour Carburant", () => {
-    const state = createState({ horses: 10_000, cps: 10 });
-
-    const nextState = buyUpgrade(state, "fuel", 50);
-
-    expect(nextState.cps).toBe(30);
-    expect(getPassiveCps(nextState)).toBe(30);
-  });
-
-  it("applique le multiplicateur clickPower pour Échappement", () => {
-    const state = createState({ horses: 10_000 });
-
-    const nextState = buyUpgrade(state, "exhaust", 100);
-
-    expect(nextState.clickPower).toBe(10);
-  });
-
-  it("applique le multiplicateur cps et le moteur affiché pour Bloc moteur", () => {
-    const state = createState({ horses: 10_000, cps: 10 });
-
-    const nextState = buyUpgrade(state, "engine", 50);
-
-    expect(nextState.cps).toBe(70);
-    expect(nextState.engineDisplay).toBe("V8");
-  });
-
-  it("cumule plusieurs upgrades sur le clickPower", () => {
-    const firstState = buyUpgrade(
-      createState({ horses: 10_000 }),
-      "admission",
-      25,
-    );
-    const secondState = buyUpgrade(firstState, "exhaust", 25);
-
-    expect(getClickPower(secondState)).toBe(3);
-  });
-
-  it("retourne un coût positif pour un palier donné", () => {
-    expect(getPurchaseCost("fuel", 100)).toBeGreaterThan(0);
-  });
-
-  it("gère le palier 500 avec le multiplicateur max", () => {
-    const state = createState({ horses: 2_000_000_000 });
-
-    const nextState = buyUpgrade(state, "admission", 500);
-
-    expect(nextState.upgrades).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ categoryId: "admission", tierId: 500 }),
-      ]),
-    );
-    expect(nextState.clickPower).toBe(50);
-  });
-
-  it("initialise clickPower à 1 si absent de l'état", () => {
-    const state = { horses: 10_000, upgrades: [] }; // pas de clickPower
-
-    const nextState = buyUpgrade(state, "admission", 1);
-
-    // clickPower doit être initialisé à 1 puis multiplié par 1.0
+    expect(nextState.horses).toBe(85);
+    expect(nextState.buildings.stagiaire).toBe(1);
+    expect(nextState.currentPassiveCps).toBeCloseTo(0.1);
     expect(nextState.clickPower).toBe(1);
   });
 
-  it("initialise cps à 0 si absent de l'état", () => {
-    const state = { horses: 10_000, upgrades: [] }; // pas de cps
+  it("refuse l'achat d'un bâtiment sans fonds suffisants", () => {
+    const state = createState({ horses: 10 });
 
-    const nextState = buyUpgrade(state, "fuel", 1);
-
-    // cps doit être initialisé à 0 puis multiplié
-    expect(nextState.cps).toBe(0);
-  });
-
-  it("getClickPower retourne 1 si clickPower absent", () => {
-    expect(getClickPower({})).toBe(1);
-  });
-
-  it("getPassiveCps retourne 0 si cps absent", () => {
-    expect(getPassiveCps({})).toBe(0);
-  });
-
-  it("achète un upgrade engine et définit engineDisplay", () => {
-    const state = createState({ horses: 10_000, cps: 5 });
-
-    const nextState = buyUpgrade(state, "engine", 1);
-
-    expect(nextState.upgrades).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ categoryId: "engine", tierId: 1 }),
-      ]),
+    expect(() => buyBuilding(state, "garage")).toThrowError(
+      expect.objectContaining({ code: "INSUFFICIENT_FUNDS" }),
     );
-    expect(nextState.engineDisplay).toBe("1-cyl");
   });
 
-  it("buyUpgrade avec state sans upgrades utilise tableau vide", () => {
-    const state = { horses: 10_000, clickPower: 1, cps: 0 }; // pas de upgrades
+  it("calcule le CPS réel d'un bâtiment avec multiplicateur ciblé", () => {
+    const state = createState({
+      buildings: { stagiaire: 10 },
+      unlockedUpgrades: ["formation_acceleree"],
+    });
 
-    const nextState = buyUpgrade(state, "admission", 1);
+    expect(calculateBuildingCps("stagiaire", state)).toBeCloseTo(2);
+  });
 
-    expect(nextState.upgrades.length).toBe(1);
+  it("calcule le CPS réel d'un bâtiment avec multiplicateur global", () => {
+    const state = createState({
+      buildings: { stagiaire: 10, garage: 5 },
+      unlockedUpgrades: ["atelier_optimise"],
+    });
+
+    expect(calculateBuildingCps("stagiaire", state)).toBeCloseTo(1.25);
+    expect(calculateBuildingCps("garage", state)).toBeCloseTo(50);
+  });
+
+  it("achète une upgrade one-off et bloque les doublons", () => {
+    const state = createState({ horses: 10_000, buildings: { stagiaire: 10 } });
+
+    const nextState = buyUpgrade(state, "formation_acceleree");
+
+    expect(nextState.horses).toBe(8_800);
+    expect(nextState.unlockedUpgrades).toContain("formation_acceleree");
+    expect(() => buyUpgrade(nextState, "formation_acceleree")).toThrowError(
+      expect.objectContaining({ code: "ALREADY_OWNED" }),
+    );
+  });
+
+  it("refuse une upgrade tant que ses conditions ne sont pas remplies", () => {
+    const state = createState({ horses: 10_000, buildings: { stagiaire: 5 } });
+
+    expect(() => buyUpgrade(state, "formation_acceleree")).toThrowError(
+      expect.objectContaining({ code: "UPGRADE_LOCKED" }),
+    );
+  });
+
+  it("applique les bonus de clic en cascade", () => {
+    const state = createState({
+      unlockedUpgrades: ["cle_a_chocs", "pole_position"],
+      buildings: { f1: 1 },
+    });
+
+    const recalculated = recalculateCachedStats(state);
+
+    expect(getClickPower(recalculated)).toBe(10);
+  });
+
+  it("retourne le CPS passif en cache", () => {
+    const state = createState({ currentPassiveCps: 123.45 });
+
+    expect(getPassiveCps(state)).toBe(123.45);
+  });
+
+  it("retourne les upgrades disponibles selon les conditions", () => {
+    const state = createState({
+      buildings: { stagiaire: 10, garage: 5 },
+      unlockedUpgrades: ["cle_a_chocs"],
+    });
+
+    const available = getAvailableUpgrades(state).map((upgrade) => upgrade.id);
+
+    expect(available).toContain("formation_acceleree");
+    expect(available).toContain("atelier_optimise");
+    expect(available).not.toContain("cle_a_chocs");
+  });
+
+  it("dispatch la bonne logique d'achat selon le type", () => {
+    const state = createState({ horses: 100, buildings: {} });
+
+    const nextState = buyPurchase(state, "building", "stagiaire");
+
+    expect(nextState.buildings.stagiaire).toBe(1);
+  });
+
+  it("recalcule les caches à partir de l'état courant", () => {
+    const state = createState({
+      buildings: { stagiaire: 10 },
+      unlockedUpgrades: ["formation_acceleree"],
+    });
+
+    const nextState = recalculateCachedStats(state);
+
+    expect(nextState.clickPower).toBe(1);
+    expect(nextState.currentPassiveCps).toBeCloseTo(2);
+  });
+
+  it("expose les catalogues de bâtiments et d'upgrades", () => {
+    expect(BUILDINGS_CATALOG.stagiaire.baseCps).toBe(0.1);
+    expect(UPGRADES_CATALOG.cle_a_chocs.effect.type).toBe("click");
   });
 });

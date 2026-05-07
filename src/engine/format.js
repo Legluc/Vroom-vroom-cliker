@@ -16,20 +16,20 @@ function formatHorses(value) {
   }
 
   if (absoluteValue < 1_000_000) {
-    return `${sign}${Math.trunc(absoluteValue / 1000)}K`;
+    return `${sign}${(absoluteValue / 1000).toFixed(1)}K`;
   }
 
   if (absoluteValue < 1_000_000_000) {
-    return `${sign}${Math.trunc(absoluteValue / 1_000_000)}M`;
+    return `${sign}${(absoluteValue / 1_000_000).toFixed(1)}M`;
   }
 
   for (const { limit, divisor, suffix } of suffixes) {
     if (absoluteValue < limit) {
-      return `${sign}${Math.trunc(absoluteValue / divisor)}${suffix}`;
+      return `${sign}${(absoluteValue / divisor).toFixed(1)}${suffix}`;
     }
   }
 
-  return `${sign}${Math.trunc(absoluteValue / 1_000_000_000_000_000)}P`;
+  return `${sign}${(absoluteValue / 1_000_000_000_000_000).toFixed(1)}P`;
 }
 
 export { formatHorses };
