@@ -1,105 +1,298 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vroom Vroom Clicker</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
 
-      /* HUD */
-      .hud { display: flex; align-items: center; gap: 1.5rem; background: #16213e; padding: .8rem 1.5rem; flex-wrap: wrap; }
-      .hud-item { display: flex; flex-direction: column; align-items: center; }
-      .hud-label { font-size: .7rem; color: #aaa; text-transform: uppercase; }
-      .hud-value { font-size: 1.4rem; font-weight: bold; color: #e94560; }
-      .logout-btn { background: none; border: 1px solid #e94560; color: #e94560; padding: .3rem .8rem; border-radius: 4px; cursor: pointer; font-size: .85rem; margin-left: auto; }
-      .logout-btn:hover { background: #e94560; color: #fff; }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vroom Vroom Clicker</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-      /* Zone principale */
-      .game-container { display: flex; gap: 1rem; padding: 1rem; max-width: 1200px; margin: 0 auto; }
-      .game-left { flex: 0 0 320px; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-      .game-right { flex: 1; }
+    body {
+      font-family: sans-serif;
+      background: #1a1a2e;
+      color: #eee;
+      min-height: 100vh;
+    }
 
-      /* Bouton clic */
-      .click-btn {
-        width: 200px; height: 200px; border-radius: 50%;
-        background: radial-gradient(circle, #e94560, #c73652);
-        border: 4px solid #ff6b6b; cursor: pointer; font-size: 3rem;
-        transition: transform .1s, box-shadow .1s;
-        box-shadow: 0 0 20px rgba(233,69,96,.5);
-        display: flex; align-items: center; justify-content: center;
-      }
-      .click-btn:active { transform: scale(.95); box-shadow: 0 0 10px rgba(233,69,96,.3); }
+    /* HUD */
+    .hud {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      background: #16213e;
+      padding: .8rem 1.5rem;
+      flex-wrap: wrap;
+    }
 
-      /* Événements */
-      .events-container { margin-bottom: 1rem; width: 100%; }
-      .event-banner {
-        display: flex; align-items: center; gap: .8rem;
-        padding: .7rem 1.2rem; border-radius: 6px; margin-bottom: .5rem;
-      }
-      .event-bonus { background: #1a472a; border-left: 4px solid #2ecc71; }
-      .event-malus { background: #4a1a1a; border-left: 4px solid #e94560; }
-      .event-icon { font-size: 1.3rem; }
-      .event-label { font-weight: bold; flex: 1; }
-      .event-countdown { font-size: .85rem; color: #aaa; }
-      .event-resolve-btn {
-        background: #e94560; color: #fff; border: none;
-        padding: .4rem .9rem; border-radius: 4px; cursor: pointer; font-size: .85rem;
-      }
-      .event-resolve-btn:hover { background: #c73652; }
+    .hud-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-      /* Upgrades */
-      .upgrades-panel h2 { margin-bottom: .8rem; color: #e94560; }
-      .upgrade-category { margin-bottom: 1.5rem; }
-      .upgrade-category h3 { margin-bottom: .5rem; font-size: .95rem; color: #aaa; border-bottom: 1px solid #333; padding-bottom: .3rem; }
-      .upgrade-list { display: flex; flex-direction: column; gap: .4rem; }
-      .upgrade-item { display: flex; align-items: center; gap: .5rem; background: #16213e; padding: .5rem .8rem; border-radius: 5px; }
-      .upgrade-item.owned { opacity: .6; }
-      .upgrade-name { flex: 1; font-size: .9rem; }
-      .upgrade-cost { font-size: .8rem; color: #aaa; }
-      .upgrade-btn {
-        background: #0f3460; border: 1px solid #e94560; color: #eee;
-        padding: .3rem .7rem; border-radius: 4px; cursor: pointer; font-size: .8rem;
-      }
-      .upgrade-btn:disabled { opacity: .4; cursor: not-allowed; }
-      .upgrade-btn:not(:disabled):hover { background: #e94560; }
-      .upgrade-owned-mark { font-size: 1rem; }
-    </style>
-  </head>
-  <body>
-    <%- include('partials/hud', { state, formatHorses }) %>
+    .hud-label {
+      font-size: .7rem;
+      color: #aaa;
+      text-transform: uppercase;
+    }
+
+    .hud-value {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: #e94560;
+    }
+
+    .logout-btn {
+      background: none;
+      border: 1px solid #e94560;
+      color: #e94560;
+      padding: .3rem .8rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .85rem;
+      margin-left: auto;
+    }
+
+    .logout-btn:hover {
+      background: #e94560;
+      color: #fff;
+    }
+
+    /* Zone principale */
+    .game-container {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .game-left {
+      flex: 0 0 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .game-right {
+      flex: 1;
+    }
+
+    /* Bouton clic */
+    .click-btn {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background-color: #1a3a5c;
+      background-image: url('/assets/picture/r34-clicker.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+      border: 4px solid #6fb1ff;
+      cursor: pointer;
+      font-size: 3rem;
+      transition: transform .1s, box-shadow .1s;
+      box-shadow: 0 0 20px rgba(111, 177, 255, .45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .click-btn:active {
+      transform: scale(.95);
+      box-shadow: 0 0 10px rgba(233, 69, 96, .3);
+    }
+
+    /* Événements */
+    .events-container {
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+
+    .event-banner {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      padding: .7rem 1.2rem;
+      border-radius: 6px;
+      margin-bottom: .5rem;
+    }
+
+    .event-bonus {
+      background: #1a472a;
+      border-left: 4px solid #2ecc71;
+    }
+
+    .event-malus {
+      background: #4a1a1a;
+      border-left: 4px solid #e94560;
+    }
+
+    .event-icon {
+      font-size: 1.3rem;
+    }
+
+    .event-label {
+      font-weight: bold;
+      flex: 1;
+    }
+
+    .event-countdown {
+      font-size: .85rem;
+      color: #aaa;
+    }
+
+    .event-resolve-btn {
+      background: #e94560;
+      color: #fff;
+      border: none;
+      padding: .4rem .9rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .85rem;
+    }
+
+    .event-resolve-btn:hover {
+      background: #c73652;
+    }
+
+    /* Upgrades */
+    .upgrades-panel h2 {
+      margin-bottom: .8rem;
+      color: #e94560;
+    }
+
+    .upgrade-category {
+      margin-bottom: 1.5rem;
+    }
+
+    .upgrade-category h3 {
+      margin-bottom: .5rem;
+      font-size: .95rem;
+      color: #aaa;
+      border-bottom: 1px solid #333;
+      padding-bottom: .3rem;
+    }
+
+    .upgrade-list {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+
+    .upgrade-item {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      background: #16213e;
+      padding: .5rem .8rem;
+      border-radius: 5px;
+    }
+
+    .upgrade-item.owned {
+      opacity: .6;
+    }
+
+    .upgrade-name {
+      flex: 1;
+      font-size: .9rem;
+    }
+
+    .upgrade-cost {
+      font-size: .8rem;
+      color: #aaa;
+    }
+
+    .upgrade-btn {
+      background: #0f3460;
+      border: 1px solid #e94560;
+      color: #eee;
+      padding: .3rem .7rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: .8rem;
+    }
+
+    .upgrade-btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .upgrade-btn:not(:disabled):hover {
+      background: #e94560;
+    }
+
+    .upgrade-owned-mark {
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('partials/hud', { state, formatHorses }) %>
 
     <div class="game-container">
       <div class="game-left">
         <%- include('partials/events', { state }) %>
-        <button
-          class="click-btn"
-          data-testid="click-button"
-          id="click-button"
-          onclick="handleClick()"
-          aria-label="Cliquer pour gagner des chevaux"
-        >🏎️</button>
+          <button class="click-btn" data-testid="click-button" id="click-button" onclick="handleClick()"
+            aria-label="Cliquer pour gagner des chevaux"></button>
       </div>
       <div class="game-right">
-        <%- include('partials/upgrades', { state, catalog }) %>
+        <%- include('partials/upgrades', { state, buildingsCatalog, upgradesCatalog }) %>
       </div>
     </div>
 
-    <script>
-      let clientState = <%- JSON.stringify(state) %>;
+    <script type="application/json" id="initial-state"><%- JSON.stringify(state) %></script>
+    <script type="application/json" id="buildings-catalog"><%- JSON.stringify(buildingsCatalog) %></script>
+    <script type="application/json" id="upgrades-catalog"><%- JSON.stringify(upgradesCatalog) %></script>
 
-      function fmt(n) {
-        if (n >= 1e9) return Math.floor(n / 1e9) + 'MM';
-        if (n >= 1e6) return Math.floor(n / 1e6) + 'M';
-        if (n >= 1e3) return Math.floor(n / 1e3) + 'K';
-        return String(Math.floor(n));
+    <script>
+      let clientState = JSON.parse(document.getElementById('initial-state').textContent);
+      const BUILDINGS_CATALOG = JSON.parse(document.getElementById('buildings-catalog').textContent);
+      const UPGRADES_CATALOG = JSON.parse(document.getElementById('upgrades-catalog').textContent);
+
+      function formatHorses(value) {
+        const truncated = Math.trunc(value);
+        const absoluteValue = Math.abs(truncated);
+        const sign = truncated < 0 ? "-" : "";
+
+        if (absoluteValue < 1000) {
+          return String(truncated);
+        }
+
+        if (absoluteValue < 1_000_000) {
+          return `${sign}${(absoluteValue / 1000).toFixed(1)}K`;
+        }
+
+        if (absoluteValue < 1_000_000_000) {
+          return `${sign}${(absoluteValue / 1_000_000).toFixed(1)}M`;
+        }
+
+        if (absoluteValue < 1_000_000_000_000) {
+          return `${sign}${(absoluteValue / 1_000_000_000).toFixed(1)}B`;
+        }
+
+        if (absoluteValue < 1_000_000_000_000_000) {
+          return `${sign}${(absoluteValue / 1_000_000_000_000).toFixed(1)}T`;
+        }
+
+        return `${sign}${(absoluteValue / 1_000_000_000_000_000).toFixed(1)}P`;
       }
 
       function updateHUD(newState) {
         clientState = { ...clientState, ...newState };
-        document.getElementById('horse-count-display').textContent = fmt(clientState.horses);
+        document.getElementById('horse-count-display').textContent = formatHorses(clientState.horses);
         document.getElementById('click-power-display').textContent = clientState.clickPower;
+        const passiveDisplay = document.getElementById('passive-cps-display');
+        if (passiveDisplay) {
+          passiveDisplay.textContent = clientState.currentPassiveCps ?? 0;
+        }
         if (clientState.engineDisplay) {
           const ed = document.getElementById('engine-display');
           ed.textContent = clientState.engineDisplay;
@@ -118,16 +311,108 @@
         } catch (e) { /* réseau */ }
       }
 
-      async function buyUpgrade(categoryId, tierId) {
+      async function buyBuilding(buildingId) {
         try {
-          const resp = await fetch('/game/upgrade', {
+          const resp = await fetch('/game/building/buy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ categoryId, tierId }),
+            body: JSON.stringify({ buildingId }),
           });
           if (!resp.ok) return;
-          window.location.reload();
+          const data = await resp.json();
+          clientState = { ...clientState, ...data };
+          updateHUD(data);
+          rerenderUpgradesPanel();
         } catch (e) { /* réseau */ }
+      }
+
+      async function buyUpgrade(upgradeId) {
+        try {
+          const resp = await fetch('/game/upgrade/buy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ upgradeId }),
+          });
+          if (!resp.ok) return;
+          const data = await resp.json();
+          clientState = { ...clientState, ...data };
+          updateHUD(data);
+          rerenderUpgradesPanel();
+        } catch (e) { /* réseau */ }
+      }
+
+      function meetsUpgradeRequirements(upgrade) {
+        return (upgrade.requirements || []).every((requirement) => {
+          const count = (clientState.buildings || {})[requirement.buildingId] || 0;
+          return count >= requirement.amount;
+        });
+      }
+
+      function getBuildingCost(buildingId) {
+        const building = BUILDINGS_CATALOG[buildingId];
+        const owned = (clientState.buildings || {})[buildingId] || 0;
+        return Math.ceil(building.baseCost * Math.pow(1.15, owned));
+      }
+
+      function rerenderUpgradesPanel() {
+        const panel = document.getElementById('upgrades-panel');
+        if (!panel) return;
+
+        const buildingsCatalogArray = Object.values(BUILDINGS_CATALOG);
+        const upgradesCatalogArray = Object.values(UPGRADES_CATALOG);
+        const buildingCounts = clientState.buildings || {};
+        const ownedUpgrades = new Set(clientState.unlockedUpgrades || []);
+
+        let html = '<h2>Bâtiments</h2><div class="upgrade-category"><div class="upgrade-list">';
+
+        // Bâtiments
+        for (const building of buildingsCatalogArray) {
+          const count = buildingCounts[building.id] || 0;
+          const cost = getBuildingCost(building.id);
+          const canAfford = clientState.horses >= cost;
+
+          html += `
+            <div class="upgrade-item" data-testid="building-item-${building.id}">
+              <div style="flex:1">
+                <div class="upgrade-name">${building.name}</div>
+                <div class="upgrade-cost">${building.baseCps} CPS · possédé ${count}</div>
+              </div>
+              <span class="upgrade-cost">${cost} 🐴</span>
+              <button class="upgrade-btn" data-testid="building-btn-${building.id}"
+                onclick="buyBuilding('${building.id}')" ${!canAfford ? 'disabled' : ''}>
+                Acheter
+              </button>
+            </div>
+          `;
+        }
+
+        html += '</div></div><h2 style="margin-top:1.5rem">Améliorations</h2><div class="upgrade-category"><div class="upgrade-list">';
+
+        // Upgrades
+        for (const upgrade of upgradesCatalogArray) {
+          if (!meetsUpgradeRequirements(upgrade)) continue;
+
+          const owned = ownedUpgrades.has(upgrade.id);
+          const canAfford = clientState.horses >= upgrade.cost;
+
+          html += `
+            <div class="upgrade-item ${owned ? 'owned' : ''}" data-testid="upgrade-item-${upgrade.id}">
+              ${owned ? `<span class="upgrade-owned-mark" data-testid="upgrade-owned-${upgrade.id}">✅</span>` : ''}
+              <div style="flex:1">
+                <div class="upgrade-name">${upgrade.name}</div>
+                <div class="upgrade-cost">${upgrade.description}</div>
+              </div>
+              <span class="upgrade-cost">${upgrade.cost} 🐴</span>
+              <button class="upgrade-btn" data-testid="upgrade-btn-${upgrade.id}"
+                onclick="buyUpgrade('${upgrade.id}')" ${(owned || !canAfford) ? 'disabled' : ''}>
+                ${owned ? 'Possédé' : 'Acheter'}
+              </button>
+            </div>
+          `;
+        }
+
+        html += '</div></div>';
+        panel.innerHTML = html;
       }
 
       async function resolveEvent() {
@@ -172,8 +457,13 @@
           if (!resp.ok) return;
           const data = await resp.json();
           updateHUD(data);
+          rerenderUpgradesPanel();
         } catch (e) { /* réseau */ }
       }, 1000);
+
+      // Initialiser le panel au chargement
+      rerenderUpgradesPanel();
     </script>
-  </body>
+</body>
+
 </html>

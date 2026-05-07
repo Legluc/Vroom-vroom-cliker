@@ -36,7 +36,9 @@ const AUTOCLICKERS_CONFIG = {
  * @returns {boolean} true si l'événement est expiré
  */
 function isEventExpired(event) {
-  if (!event) {return false;}
+  if (!event) {
+    return false;
+  }
   return event.expiresAt < Date.now();
 }
 
@@ -145,10 +147,12 @@ export function getTotalCps(state) {
     state.activeEvent = null;
   }
 
-  // Calculer le CPS de base
-  let baseCps = state.autoclickers
-    .filter((a) => a.active)
-    .reduce((sum, a) => sum + a.cps, 0);
+  // Calculer le CPS de base en additionnant bâtiments + autoclickers
+  let baseCps =
+    (state.currentPassiveCps ?? 0) +
+    state.autoclickers
+      .filter((a) => a.active)
+      .reduce((sum, a) => sum + a.cps, 0);
 
   // Appliquer les multiplicateurs d'événement
   if (state.activeEvent) {

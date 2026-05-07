@@ -5,22 +5,32 @@
   </div>
   <div class="hud-item">
     <span class="hud-label">⚡ Puissance/clic</span>
-    <span class="hud-value" id="click-power-display" data-testid="click-power"><%= state.clickPower %></span>
+    <span class="hud-value" id="click-power-display" data-testid="click-power">
+      <%= state.clickPower %>
+    </span>
+  </div>
+  <div class="hud-item">
+    <span class="hud-label">🏭 CPS passif</span>
+    <span class="hud-value" id="passive-cps-display" data-testid="passive-cps">
+      <%= state.currentPassiveCps || 0 %>
+    </span>
   </div>
   <% if (state.engineDisplay) { %>
-  <div class="hud-item">
-    <span class="hud-label">🔧 Moteur</span>
-    <span class="hud-value" id="engine-display" data-testid="engine-display"><%= state.engineDisplay %></span>
-  </div>
-  <% } else { %>
-  <div class="hud-item" style="display:none">
-    <span class="hud-label">🔧 Moteur</span>
-    <span class="hud-value" id="engine-display" data-testid="engine-display"></span>
-  </div>
-  <% } %>
-  <div class="hud-item">
-    <form action="/auth/logout" method="POST" style="display:inline">
-      <button type="submit" class="logout-btn" data-testid="logout-btn">Déconnecter</button>
-    </form>
-  </div>
+    <div class="hud-item">
+      <span class="hud-label">🔧 Moteur</span>
+      <span class="hud-value" id="engine-display" data-testid="engine-display">
+        <%= state.engineDisplay %>
+      </span>
+    </div>
+    <% } else { %>
+      <div class="hud-item" style="display:none">
+        <span class="hud-label">🔧 Moteur</span>
+        <span class="hud-value" id="engine-display" data-testid="engine-display"></span>
+      </div>
+      <% } %>
+        <div class="hud-item">
+          <form action="/auth/logout" method="POST" style="display:inline">
+            <button type="submit" class="logout-btn" data-testid="logout-btn">Déconnecter</button>
+          </form>
+        </div>
 </div>

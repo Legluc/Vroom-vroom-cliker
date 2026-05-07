@@ -1,13 +1,17 @@
 import { Router } from "express";
 import { processClick } from "../engine/click.js";
-import { buyUpgrade } from "../engine/upgrades.js";
+import {
+  buyBuilding,
+  buyUpgrade,
+  recalculateCachedStats,
+} from "../engine/upgrades.js";
 import {
   buyAutoclicker,
   upgradeAutoclicker,
   applyTick,
 } from "../engine/autoclicker.js";
 import { resolveEvent } from "../engine/events.js";
-import { createDefaultState } from "../engine/state.js";
+import { createDefaultState, mergeWithDefaults } from "../engine/state.js";
 import { saveGameState, loadGameState } from "../db/gameStateRepo.js";
 
 /**
@@ -22,7 +26,8 @@ export function createGameRouter(db) {
   // Helper : charge l'état ou crée un défaut
   function getState(userId) {
     const loaded = loadGameState(db, userId);
-    return loaded ?? createDefaultState(userId);
+    const baseState = loaded ?? createDefaultState(userId);
+    return recalculateCachedStats(mergeWithDefaults(baseState));
   }
 
   // GET /game/state — récupère le GameState courant
@@ -45,20 +50,10 @@ export function createGameRouter(db) {
     });
   });
 
-  // POST /game/upgrade — achète un upgrade
-  router.post("/upgrade", (req, res) => {
-    const { categoryId, tierId } = req.body ?? {};
-
-    if (categoryId === undefined || tierId === undefined) {
-      return res.status(400).json({ error: "INVALID_BODY" });
-    }
-
-    const userId = req.session.userId;
-    const state = getState(userId);
-
+  function handlePurchase(res, state, purchaseFn) {
     try {
-      const newState = buyUpgrade(state, categoryId, Number(tierId));
-      saveGameState(db, userId, newState);
+      const newState = purchaseFn(state);
+      saveGameState(db, state.userId, newState);
       return res.json(newState);
     } catch (err) {
       const code = err.code ?? err.message;
@@ -67,6 +62,54 @@ export function createGameRouter(db) {
       }
       return res.status(400).json({ error: code });
     }
+  }
+
+  // POST /game/building/buy — achète un bâtiment
+  router.post("/building/buy", (req, res) => {
+    const { buildingId } = req.body ?? {};
+
+    if (!buildingId) {
+      return res.status(400).json({ error: "INVALID_BODY" });
+    }
+
+    const userId = req.session.userId;
+    const state = getState(userId);
+
+    return handlePurchase(res, { ...state, userId }, (currentState) =>
+      buyBuilding(currentState, buildingId),
+    );
+  });
+
+  // POST /game/upgrade/buy — achète une amélioration one-off
+  router.post("/upgrade/buy", (req, res) => {
+    const { upgradeId } = req.body ?? {};
+
+    if (!upgradeId) {
+      return res.status(400).json({ error: "INVALID_BODY" });
+    }
+
+    const userId = req.session.userId;
+    const state = getState(userId);
+
+    return handlePurchase(res, { ...state, userId }, (currentState) =>
+      buyUpgrade(currentState, upgradeId),
+    );
+  });
+
+  // Alias de compatibilité pour l'ancien client
+  router.post("/upgrade", (req, res) => {
+    const { upgradeId } = req.body ?? {};
+
+    if (!upgradeId) {
+      return res.status(400).json({ error: "INVALID_BODY" });
+    }
+
+    const userId = req.session.userId;
+    const state = getState(userId);
+
+    return handlePurchase(res, { ...state, userId }, (currentState) =>
+      buyUpgrade(currentState, upgradeId),
+    );
   });
 
   // POST /game/autoclicker/buy — achète un autoclicker

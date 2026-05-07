@@ -1,45 +1,70 @@
-<%
-  // catalog est passé par la route :
-  // { admission: { tiers: { 1: {...}, 25: {...} } }, ... }
-  const categoryLabels = {
-    admission: '🌬️ Admission',
-    fuel: '⛽ Carburant',
-    exhaust: '💨 Échappement',
-    engine: '🔧 Bloc moteur',
-  };
-  const ownedSet = new Set((state.upgrades || []).map(u => u.categoryId + '-' + u.tierId));
-%>
-<div class="upgrades-panel" id="upgrades-panel">
-  <h2>Upgrades</h2>
-  <% for (const [catId, catDef] of Object.entries(catalog)) { %>
+<% const buildings=Object.values(buildingsCatalog); const upgrades=Object.values(upgradesCatalog); const
+  buildingCounts=state.buildings || {}; const ownedUpgrades=new Set(state.unlockedUpgrades || []); function
+  isUpgradeVisible(upgrade) { return (upgrade.requirements || []).every((requirement)=> {
+  const count = buildingCounts[requirement.buildingId] || 0;
+  return count >= requirement.amount;
+  });
+  }
+  %>
+  <div class="upgrades-panel" id="upgrades-panel">
+    <h2>Bâtiments</h2>
     <div class="upgrade-category">
-      <h3><%= categoryLabels[catId] || catId %></h3>
       <div class="upgrade-list">
-        <% for (const [tierId, tierDef] of Object.entries(catDef.tiers)) { %>
-          <%
-            const key = catId + '-' + tierId;
-            const owned = ownedSet.has(key);
-            const canAfford = state.horses >= tierDef.cost;
-          %>
-          <div class="upgrade-item <%= owned ? 'owned' : '' %>" data-testid="upgrade-item-<%= catId %>-<%= tierId %>">
-            <% if (owned) { %>
-              <span class="upgrade-owned-mark" data-testid="upgrade-owned-<%= catId %>-<%= tierId %>">✅</span>
+        <% for (const building of buildings) { %>
+          <% const count=buildingCounts[building.id] || 0; const cost=Math.ceil(building.baseCost * Math.pow(1.15,
+            count)); const canAfford=state.horses>= cost;
+            %>
+            <div class="upgrade-item" data-testid="building-item-<%= building.id %>">
+              <div style="flex:1">
+                <div class="upgrade-name">
+                  <%= building.name %>
+                </div>
+                <div class="upgrade-cost">
+                  <%= building.baseCps %> CPS · possédé <%= count %>
+                </div>
+              </div>
+              <span class="upgrade-cost">
+                <%= cost %> 🐴
+              </span>
+              <button class="upgrade-btn" data-testid="building-btn-<%= building.id %>"
+                onclick="buyBuilding('<%= building.id %>')" <%=!canAfford ? 'disabled' : '' %>
+                >
+                Acheter
+              </button>
+            </div>
             <% } %>
-            <span class="upgrade-name"><%= tierDef.display %></span>
-            <span class="upgrade-cost"><%= tierDef.cost %> 🐴</span>
-            <button
-              class="upgrade-btn"
-              data-testid="upgrade-btn-<%= catId %>-<%= tierId %>"
-              data-category="<%= catId %>"
-              data-tier="<%= tierId %>"
-              onclick="buyUpgrade('<%= catId %>', <%= tierId %>)"
-              <%= (owned || !canAfford) ? 'disabled' : '' %>
-            >
-              <%= owned ? 'Possédé' : 'Acheter' %>
-            </button>
-          </div>
-        <% } %>
       </div>
     </div>
-  <% } %>
-</div>
+
+    <h2 style="margin-top:1.5rem">Améliorations</h2>
+    <div class="upgrade-category">
+      <div class="upgrade-list">
+        <% for (const upgrade of upgrades) { %>
+          <% if (!isUpgradeVisible(upgrade)) { continue; } %>
+            <% const owned=ownedUpgrades.has(upgrade.id); const canAfford=state.horses>= upgrade.cost;
+              %>
+              <div class="upgrade-item <%= owned ? 'owned' : '' %>" data-testid="upgrade-item-<%= upgrade.id %>">
+                <% if (owned) { %>
+                  <span class="upgrade-owned-mark" data-testid="upgrade-owned-<%= upgrade.id %>">✅</span>
+                  <% } %>
+                    <div style="flex:1">
+                      <div class="upgrade-name">
+                        <%= upgrade.name %>
+                      </div>
+                      <div class="upgrade-cost">
+                        <%= upgrade.description %>
+                      </div>
+                    </div>
+                    <span class="upgrade-cost">
+                      <%= upgrade.cost %> 🐴
+                    </span>
+                    <button class="upgrade-btn" data-testid="upgrade-btn-<%= upgrade.id %>"
+                      onclick="buyUpgrade('<%= upgrade.id %>')" <%=(owned || !canAfford) ? 'disabled' : '' %>
+                      >
+                      <%= owned ? 'Possédé' : 'Acheter' %>
+                    </button>
+              </div>
+              <% } %>
+      </div>
+    </div>
+  </div>
