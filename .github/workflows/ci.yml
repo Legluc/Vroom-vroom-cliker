@@ -71,9 +71,13 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
           script: |
-            cd /var/www/cookieclicker
+            if [ ! -d /var/www/Vroom-vroom-cliker/.git ]; then
+              git clone https://github.com/Legluc/Vroom-vroom-cliker.git /var/www/Vroom-vroom-cliker
+            fi
+            cd /var/www/Vroom-vroom-cliker
             git fetch origin main
             git reset --hard origin/main
-            npm ci --omit=dev
-            npx pm2 reload cookieclicker || npx pm2 start npm --name cookieclicker -- start
+            npm install --omit=dev
+            mkdir -p data
+            npx pm2 reload Vroom-vroom-cliker || npx pm2 start npm --name Vroom-vroom-cliker -- start
             npx pm2 save
